@@ -43,7 +43,7 @@ jobs:
         PYTHONUNBUFFERED: "1"
       run: |
         # Run specific channel. You can duplicate this step for other channels
-        python automation.py --once --channel motivation_en
+        python automation.py --once --channel movies_en
 
     - name: Upload Logs (on failure)
       if: failure()

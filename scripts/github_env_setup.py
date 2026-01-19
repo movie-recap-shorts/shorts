@@ -42,8 +42,11 @@ def setup_environment():
         # Save for all configured channels (assuming logic handles names)
         # For simplicity, we save as a specific name that matches the channel
         # We need to know the channel name. Let's assume passed via env or hardcoded logic
-        # For now, we'll save it as 'motivation_en_client_secret.json' based on our setup
-        target_file = credentials_dir / "motivation_en_client_secret.json"
+        # Save as movies_en_client_secret.json (since channels.json points to movies_en.json, 
+        # but let's stick to the convention or what the file actually is.
+        # The channels.json says "credentials_file": "movies_en.json".
+        # So we should save it as credentials/movies_en.json
+        target_file = credentials_dir / "movies_en.json"
         with open(target_file, "w") as f:
             f.write(client_secret_content)
         print(f"Created {target_file}")
@@ -51,7 +54,7 @@ def setup_environment():
     # Users should put the content of their token.json into TOKEN_JSON secret
     token_content = os.environ.get("TOKEN_JSON")
     if token_content:
-        target_file = credentials_dir / "motivation_en_token.json"
+        target_file = credentials_dir / "movies_en_token.json"
         with open(target_file, "w") as f:
             f.write(token_content)
         print(f"Created {target_file}")
