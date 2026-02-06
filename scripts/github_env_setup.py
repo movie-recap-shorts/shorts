@@ -32,7 +32,7 @@ def setup_environment():
     # Create default config structure
     config_data = {
         "app": {
-            "llm_provider": "pollinations",
+            "llm_provider": "g4f",
             "pexels_api_keys": [pexels_key] if pexels_key else [],
             "pixabay_api_keys": [pixabay_key] if pixabay_key else [],
             "video_source": video_source,
