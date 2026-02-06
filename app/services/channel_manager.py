@@ -15,6 +15,7 @@ from datetime import datetime
 from loguru import logger
 
 from app.services.youtube_uploader import YouTubeUploader
+from app.services.script_cache import get_topic_cache
 
 
 @dataclass
@@ -198,19 +199,28 @@ class ChannelManager:
     
     def get_random_topic(self, channel_name: str) -> Optional[str]:
         """
-        Get a random topic for video generation.
+        Get a smart topic for video generation.
+        Uses topic history cache to avoid repetition - prefers unused topics,
+        falls back to least-used ones.
         
         Args:
             channel_name: Name of the channel
             
         Returns:
-            Random topic string or None
+            Selected topic string or None
         """
         channel = self.channels.get(channel_name)
         if not channel or not channel.topics:
             return None
         
-        return random.choice(channel.topics)
+        # Use smart topic selection from cache
+        cache = get_topic_cache()
+        selected_topic = cache.get_smart_topic(channel_name, channel.topics)
+        
+        # Record the usage
+        cache.record_usage(channel_name, selected_topic)
+        
+        return selected_topic
     
     def can_upload(self, channel_name: str) -> bool:
         """

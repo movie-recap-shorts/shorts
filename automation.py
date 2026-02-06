@@ -112,6 +112,7 @@ def generate_and_upload(
             video_clip_duration=video_params['video_clip_duration'],
             paragraph_number=video_params['paragraph_number'],
             subtitle_enabled=video_params['subtitle_enabled'],
+            subtitle_position=video_params.get('subtitle_position', 'top'),
             video_count=1,
         )
         
@@ -131,8 +132,52 @@ def generate_and_upload(
             logger.info("Dry run mode - skipping upload")
             return True
         
-        # Prepare upload metadata
-        title = video_params['video_subject'][:90]  # Leave room for #Shorts
+        # Prepare upload metadata with enhanced title
+        def enhance_title(base_title: str) -> str:
+            """Make titles more clickable with emojis and power words"""
+            emoji_map = {
+                'sci fi': '🚀',
+                'science fiction': '🚀',
+                'apocalyptic': '🌍',
+                'zombie': '🧟',
+                'thriller': '😱',
+                'psychological': '🧠',
+                'mind': '🤯',
+                'conspiracy': '🕵️',
+                'action': '💥',
+                'cop': '👮',
+                'heist': '💰',
+                'revenge': '⚔️',
+                'prison': '🔒',
+                'chase': '🏃',
+                'disaster': '🔥',
+                'monster': '👹',
+                'survival': '⛺',
+                'space': '🌌',
+                'parallel': '🌀',
+                'motivation': '💪',
+                'success': '🎯',
+                'mindset': '🧠',
+                'billionaire': '💰',
+                'winner': '🏆',
+                'confidence': '💎',
+                'discipline': '⚡',
+            }
+            
+            # Find relevant emoji
+            title_lower = base_title.lower()
+            emoji = ''
+            for keyword, icon in emoji_map.items():
+                if keyword in title_lower:
+                    emoji = icon + ' '
+                    break
+            
+            # Capitalize important words for better readability
+            enhanced = base_title.title()
+            
+            return f"{emoji}{enhanced} #Shorts"[:100]
+        
+        title = enhance_title(video_params['video_subject'])
         
         # Create description from script
         script_summary = video_script[:500] if video_script else ""
