@@ -33,6 +33,7 @@ class ChannelConfig:
     video_clip_duration: int = 5
     paragraph_number: int = 2
     subtitle_enabled: bool = True
+    subtitle_position: str = "top"  # top, bottom, center
     
     # Upload settings
     default_privacy: str = "public"
