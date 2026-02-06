@@ -36,6 +36,7 @@ jobs:
         PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
         CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
         TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+        DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         CHANNEL_NAME: movies_en
       run: python scripts/github_env_setup.py
 
