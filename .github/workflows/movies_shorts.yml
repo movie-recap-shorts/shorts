@@ -3,7 +3,7 @@ name: Movies Shorts Automation
 on:
   schedule:
     # Runs every 15 minutes
-    - cron: '52 * * * *'
+    - cron: '11,17,23,29,39,47,53,59 * * * *'
   workflow_dispatch:  # Allows manual run from GitHub interface
 
 jobs:
