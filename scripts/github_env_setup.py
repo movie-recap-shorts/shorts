@@ -52,19 +52,53 @@ def setup_environment():
     
     # 2. Setup YouTube Credentials for the specific channel
     client_secret_content = os.environ.get("CLIENT_SECRET_JSON")
+    target_secret_file = credentials_dir / f"{channel_name}_client_secret.json"
+    
     if client_secret_content:
-        target_file = credentials_dir / f"{channel_name}_client_secret.json"
-        with open(target_file, "w") as f:
+        with open(target_secret_file, "w") as f:
             f.write(client_secret_content)
-        print(f"Created {target_file}")
+        print(f"Created {target_secret_file} from secret")
+    elif target_secret_file.exists():
+        print(f"Using existing {target_secret_file} from repository")
+    else:
+        print(f"WARNING: No client secret found for {channel_name}")
         
-    # Setup token for the specific channel
-    token_content = os.environ.get("TOKEN_JSON")
-    if token_content:
-        target_file = credentials_dir / f"{channel_name}_token.json"
-        with open(target_file, "w") as f:
-            f.write(token_content)
-        print(f"Created {target_file}")
+    # Setup token: Priority: Google Sheets > Secret > Local File
+    token_saved = False
+    
+    # Try fetching from Google Sheets
+    if TokenStorage: # Check if TokenStorage was successfully imported at the top
+        try:
+            print("Attempting to fetch token from Google Sheets...")
+            storage = TokenStorage()
+            token_data = storage.get_token(channel_name)
+            
+            if token_data:
+                target_token_file = credentials_dir / f"{channel_name}_token.json"
+                with open(target_token_file, "w") as f:
+                    json.dump(token_data, f)
+                print(f"✅ Fetched and saved token for {channel_name} from Google Sheets")
+                token_saved = True
+            else:
+                print("No token found in Google Sheets")
+        except Exception as e:
+            print(f"Failed to fetch from Google Sheets: {e}")
+    else:
+        print("TokenStorage not available, skipping Google Sheets token fetch.")
+
+    # Fallback to Secret or Local File
+    if not token_saved:
+        token_content = os.environ.get("TOKEN_JSON")
+        target_token_file = credentials_dir / f"{channel_name}_token.json"
+        
+        if token_content:
+            with open(target_token_file, "w") as f:
+                f.write(token_content)
+            print(f"Created {target_token_file} from secret")
+        elif target_token_file.exists():
+            print(f"Using existing {target_token_file} from repository")
+        else:
+            print(f"WARNING: No token found for {channel_name}")
 
     # 3. Setup channels.json if passed as secret (optional, otherwise uses repo file)
     channels_content = os.environ.get("CHANNELS_CONFIG")
