@@ -3,7 +3,7 @@ name: Motivation Shorts Automation
 on:
   schedule:
     # Runs every 15 minutes
-    - cron: '7,13,19,29,37,43,53,59 * * * *'
+    - cron: '11,17,23,29,39,47,53,59 * * * *'
   workflow_dispatch:  # Allows manual run from GitHub interface
 
 jobs:
