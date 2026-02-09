@@ -75,12 +75,13 @@ class YouTubeUploader:
         self.token_file = self.credentials_dir / f"{channel_name}_token.json"
         self.client_secret_file = self.credentials_dir / f"{channel_name}_client_secret.json"
         
-    def authenticate(self, interactive: bool = True) -> bool:
+    def authenticate(self, interactive: bool = True, use_console: bool = False) -> bool:
         """
         Authenticate with YouTube API using OAuth 2.0.
         
         Args:
-            interactive: If True, opens browser for authentication when needed
+            interactive: If True, opens browser or console for authentication
+            use_console: If True, uses console-based authentication (copy-paste code)
             
         Returns:
             True if authentication successful, False otherwise
@@ -106,7 +107,18 @@ class YouTubeUploader:
                     flow = InstalledAppFlow.from_client_secrets_file(
                         str(self.client_secret_file), SCOPES
                     )
-                    self.credentials = flow.run_local_server(port=0)
+                    if use_console:
+                        # Manual console flow: force redirect_uri to match config
+                        flow.redirect_uri = 'http://localhost'
+                        auth_url, _ = flow.authorization_url(prompt='consent')
+                        print(f"Please visit this URL: {auth_url}")
+                        print("AFTER authorizing, you will be redirected to 'http://localhost/?code=...'")
+                        print("Copy the EVERYTHING after 'code=' from the address bar and paste it here.")
+                        code = input("Enter the authorization code: ")
+                        flow.fetch_token(code=code)
+                        self.credentials = flow.credentials
+                    else:
+                        self.credentials = flow.run_local_server(port=0)
                 else:
                     logger.error("No valid credentials and interactive mode is disabled")
                     return False
