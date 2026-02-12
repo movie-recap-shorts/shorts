@@ -8,6 +8,7 @@ on:
 
 jobs:
   motivation-channel:
+    if: github.repository == 'statsmeans-source/shorts'
     runs-on: ubuntu-latest
     permissions:
       contents: read

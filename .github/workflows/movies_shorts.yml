@@ -8,6 +8,7 @@ on:
 
 jobs:
   movies-channel:
+    if: github.repository == 'movie-recap-shorts/shorts'
     runs-on: ubuntu-latest
     permissions:
       contents: read
