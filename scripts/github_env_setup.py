@@ -67,24 +67,28 @@ def setup_environment():
     token_saved = False
     
     # Try fetching from Google Sheets
-    if TokenStorage: # Check if TokenStorage was successfully imported at the top
-        try:
-            print("Attempting to fetch token from Google Sheets...")
-            storage = TokenStorage()
-            token_data = storage.get_token(channel_name)
-            
-            if token_data:
-                target_token_file = credentials_dir / f"{channel_name}_token.json"
-                with open(target_token_file, "w") as f:
-                    json.dump(token_data, f)
-                print(f"✅ Fetched and saved token for {channel_name} from Google Sheets")
-                token_saved = True
-            else:
-                print("No token found in Google Sheets")
-        except Exception as e:
-            print(f"Failed to fetch from Google Sheets: {e}")
-    else:
-        print("TokenStorage not available, skipping Google Sheets token fetch.")
+    # Try fetching from Google Sheets
+    try:
+        import sys
+        sys.path.insert(0, str(root_dir))
+        from app.services.token_storage import TokenStorage
+        
+        print("Attempting to fetch token from Google Sheets...")
+        storage = TokenStorage()
+        token_data = storage.get_token(channel_name)
+        
+        if token_data:
+            target_token_file = credentials_dir / f"{channel_name}_token.json"
+            with open(target_token_file, "w") as f:
+                json.dump(token_data, f)
+            print(f"✅ Fetched and saved token for {channel_name} from Google Sheets")
+            token_saved = True
+        else:
+            print("No token found in Google Sheets")
+    except ImportError:
+        print("TokenStorage service not found (dependencies missing?), skipping Google Sheets fetch.")
+    except Exception as e:
+        print(f"Failed to fetch from Google Sheets: {e}")
 
     # Fallback to Secret or Local File
     if not token_saved:
