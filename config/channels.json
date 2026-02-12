@@ -39,7 +39,7 @@
             "language": "en",
             "voice": "en-US-GuyNeural-Male",
             "video_aspect": "9:16",
-            "video_clip_duration": 3,
+            "video_clip_duration": 2,
             "paragraph_number": 1,
             "subtitle_enabled": true,
             "subtitle_position": "center",
@@ -66,8 +66,8 @@
                 "spoiler alert"
             ],
             "description_template": "🎬 {script_summary}\n\n🍿 Watch this quick recap of one of the best movies ever made!\n\n👇 Subscribe for more daily movie recommendations and recaps!\n\n🔔 Turn on notifications so you never miss a hidden gem!\n\n#Shorts #MovieRecap #FilmSummary #BestMovies #Cinema #Movies #Film #MovieReview #MustWatch",
-            "min_upload_interval_minutes": 30,
-            "daily_video_limit": 6
+            "min_upload_interval_minutes": 10,
+            "daily_video_limit": 50
         },
         {
             "name": "motivation_en",
@@ -93,7 +93,7 @@
             "language": "en",
             "voice": "en-US-GuyNeural-Male",
             "video_aspect": "9:16",
-            "video_clip_duration": 3,
+            "video_clip_duration": 2,
             "paragraph_number": 2,
             "subtitle_enabled": true,
             "subtitle_position": "center",
@@ -120,8 +120,8 @@
                 "growth mindset"
             ],
             "description_template": "💪 {script_summary}\n\n🔥 Get your daily dose of motivation!\n\n👇 Subscribe for daily inspirational content!\n\n🔔 Turn on notifications to start every day motivated!\n\n#Shorts #Motivation #Success #Mindset #Inspiration #NeverGiveUp #Hustle #SelfImprovement #DailyMotivation",
-            "min_upload_interval_minutes": 30,
-            "daily_video_limit": 6
+            "min_upload_interval_minutes": 10,
+            "daily_video_limit": 50
         }
     ]
 }
