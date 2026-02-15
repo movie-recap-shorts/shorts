@@ -252,11 +252,12 @@ class ChannelManager:
             tz = pytz.timezone(self.timezone)
             now = datetime.now(tz)
             
-            # Standard approach: check if trigger fires within [now - 14m, now + 1m]
+            # Standard approach: check if trigger fires within [now - 14m, now + 14m]
+            # This allows the 15-minute cycle of GitHub Actions to catch the slot
             start_window = now - timedelta(minutes=14)
             next_fire = trigger.get_next_fire_time(None, start_window)
             
-            if next_fire and next_fire <= (now + timedelta(minutes=1)):
+            if next_fire and next_fire <= (now + timedelta(minutes=14)):
                 return True
                 
             return False

@@ -22,3 +22,7 @@ google-auth-httplib2>=0.1.0
 APScheduler>=3.10.0
 gspread>=6.0.0
 oauth2client>=4.1.3
+instagrapi>=2.1.2
+tiktok-uploader>=0.7.0
+pytz
+
