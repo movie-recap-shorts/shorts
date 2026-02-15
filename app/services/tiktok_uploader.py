@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 
 from loguru import logger
+try:
+    from tiktok_uploader.upload import upload_video
+    TIKTOK_UPLOADER_AVAILABLE = True
 except ImportError as e:
     TIKTOK_UPLOADER_AVAILABLE = False
     logger.warning(f"tiktok-uploader library not found or import failed: {e}. Run: pip install tiktok-uploader")
