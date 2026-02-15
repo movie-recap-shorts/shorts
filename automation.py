@@ -66,7 +66,8 @@ def generate_meme_and_upload(
     channel_name: str,
     channel_manager: ChannelManager,
     topic: Optional[str] = None,
-    dry_run: bool = False
+    dry_run: bool = False,
+    ignore_interval: bool = False
 ) -> bool:
     """
     Generate a meme-surprise video and upload it to YouTube.
@@ -75,7 +76,7 @@ def generate_meme_and_upload(
     logger.info(f"Starting MEME video generation for channel: {channel_name}")
     
     # Check rate limits
-    if not dry_run and not channel_manager.can_upload(channel_name):
+    if not dry_run and not channel_manager.can_upload(channel_name, ignore_interval=ignore_interval):
         logger.warning(f"Rate limit exceeded for {channel_name}, skipping...")
         return False
     
@@ -181,7 +182,8 @@ def generate_and_upload(
     channel_name: str,
     channel_manager: ChannelManager,
     topic: Optional[str] = None,
-    dry_run: bool = False
+    dry_run: bool = False,
+    ignore_interval: bool = False
 ) -> bool:
     """
     Generate a video and upload it to YouTube.
@@ -198,7 +200,7 @@ def generate_and_upload(
     logger.info(f"Starting video generation for channel: {channel_name}")
     
     # Check rate limits
-    if not dry_run and not channel_manager.can_upload(channel_name):
+    if not dry_run and not channel_manager.can_upload(channel_name, ignore_interval=ignore_interval):
         logger.warning(f"Rate limit exceeded for {channel_name}, skipping...")
         return False
     
@@ -539,14 +541,16 @@ def main():
                     channel_name=args.channel,
                     channel_manager=channel_manager,
                     topic=args.topic,
-                    dry_run=args.dry_run
+                    dry_run=args.dry_run,
+                    ignore_interval=(num_videos > 1)
                 )
             else:
                 success = generate_and_upload(
                     channel_name=args.channel,
                     channel_manager=channel_manager,
                     topic=args.topic,
-                    dry_run=args.dry_run
+                    dry_run=args.dry_run,
+                    ignore_interval=(num_videos > 1)
                 )
             
             if success:

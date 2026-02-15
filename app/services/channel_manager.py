@@ -223,12 +223,13 @@ class ChannelManager:
         
         return selected_topic
     
-    def can_upload(self, channel_name: str) -> bool:
+    def can_upload(self, channel_name: str, ignore_interval: bool = False) -> bool:
         """
         Check if channel can upload based on rate limits.
         
         Args:
             channel_name: Name of the channel
+            ignore_interval: If True, bypass the minimum time between uploads check
             
         Returns:
             True if upload is allowed
@@ -251,7 +252,7 @@ class ChannelManager:
             return False
         
         # Check interval
-        if history:
+        if history and not ignore_interval:
             last_upload = max(history)
             minutes_since = (now - last_upload).total_seconds() / 60
             if minutes_since < channel.min_upload_interval_minutes:
