@@ -84,8 +84,8 @@ def generate_meme_and_upload(
         ignore_interval=ignore_interval,
         ignore_schedule=ignore_schedule
     ):
-        logger.warning(f"Upload criteria not met for {channel_name}, skipping...")
-        return False
+        logger.info(f"Upload criteria not met for {channel_name}, skipping.")
+        return None
     
     # Get channel config
     channel = channel_manager.get_channel(channel_name)
@@ -242,8 +242,8 @@ def generate_and_upload(
         ignore_interval=ignore_interval,
         ignore_schedule=ignore_schedule
     ):
-        logger.warning(f"Upload criteria not met for {channel_name}, skipping...")
-        return False
+        logger.info(f"Upload criteria not met for {channel_name}, skipping.")
+        return None
     
     # Get channel config
     channel = channel_manager.get_channel(channel_name)
@@ -622,12 +622,13 @@ def main():
                 logger.info(f"🚀 Catch-up mode: {missed_slots} slots missed since last run ({last_run.strftime('%H:%M')}). Generating {num_videos} videos.")
 
         total_success = 0
+        any_error = False
         for i in range(num_videos):
             if num_videos > 1:
                 logger.info(f"📢 Generating catch-up video {i+1}/{num_videos}...")
             
             if video_mode == 'meme':
-                success = generate_meme_and_upload(
+                result = generate_meme_and_upload(
                     channel_name=args.channel,
                     channel_manager=channel_manager,
                     topic=args.topic,
@@ -636,7 +637,7 @@ def main():
                     ignore_schedule=args.ignore_schedule
                 )
             else:
-                success = generate_and_upload(
+                result = generate_and_upload(
                     channel_name=args.channel,
                     channel_manager=channel_manager,
                     topic=args.topic,
@@ -645,15 +646,19 @@ def main():
                     ignore_schedule=args.ignore_schedule
                 )
             
-            if success:
+            if result is True:
                 total_success += 1
+            elif result is False:
+                any_error = True
             
             # Small delay between batch uploads to stabilize YouTube ingestion
             if num_videos > 1 and i < num_videos - 1:
                 import time
                 time.sleep(10)
         
-        sys.exit(0 if total_success > 0 else 1)
+        # Exit with 0 if no errors occurred (even if skipped)
+        # Exit with 1 only if there was a genuine generation/upload failure
+        sys.exit(1 if any_error else 0)
     
     # Run scheduler
     if args.mode == 'scheduler':
