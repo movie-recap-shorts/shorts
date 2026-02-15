@@ -39,7 +39,7 @@
             ],
             "description_template": "🎬 {script_summary}\n\n🍿 Did you catch this secret detail? Let us know in the comments!\n\n👇 Subscribe for daily hidden movie secrets!\n\n🔥 Best Movie Deals (Affiliate): https://amzn.to/example-movies\n\n#Shorts #MovieSecrets #DidYouNotice #FilmTheory #Cinema #HiddenDetails #EasterEggs",
             "min_upload_interval_minutes": 10,
-            "daily_video_limit": 100,
+            "daily_video_limit": 10,
             "enable_tiktok": false,
             "enable_instagram": false
         },
@@ -82,7 +82,7 @@
             ],
             "description_template": "💪 {script_summary}\n\n🔥 Shift your mindset today and join the top 1%.\n\n👇 Subscribe for daily stoic wisdom and billionaire tips!\n\n📚 Recommended Stoic Books (Affiliate): https://amzn.to/example-stoic\n\n#Shorts #Stoicism #Motivation #Success #Mindset #SelfImprovement #Wisdom #Hustle #BillionaireMindset",
             "min_upload_interval_minutes": 10,
-            "daily_video_limit": 100,
+            "daily_video_limit": 10,
             "enable_tiktok": true,
             "enable_instagram": true
         }

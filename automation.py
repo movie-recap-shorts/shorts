@@ -171,9 +171,9 @@ def generate_meme_and_upload(
             channel_manager.record_upload(channel_name)
             
             # --- CROSS-PLATFORM UPLOAD (TikTok & Instagram) ---
-            channel_config = channel_manager.get_channel_config(channel_name)
+            channel_config = channel_manager.get_channel(channel_name)
             
-            if channel_config.get("enable_instagram"):
+            if channel_config.enable_instagram:
                 logger.info(f"Uploading to Instagram Reels for {channel_name}...")
                 try:
                     ig_result = upload_video_to_instagram(
@@ -186,7 +186,7 @@ def generate_meme_and_upload(
                 except Exception as e:
                     logger.error(f"Instagram upload failed: {e}")
                     
-            if channel_config.get("enable_tiktok"):
+            if channel_config.enable_tiktok:
                 logger.info(f"Uploading to TikTok for {channel_name}...")
                 try:
                     tt_result = upload_to_tiktok(
@@ -365,9 +365,9 @@ def generate_and_upload(
             channel_manager.record_upload(channel_name)
             
             # --- CROSS-PLATFORM UPLOAD (TikTok & Instagram) ---
-            channel_config = channel_manager.get_channel_config(channel_name)
+            channel_config = channel_manager.get_channel(channel_name)
             
-            if channel_config.get("enable_instagram"):
+            if channel_config.enable_instagram:
                 logger.info(f"Uploading to Instagram Reels for {channel_name}...")
                 try:
                     ig_result = upload_video_to_instagram(
@@ -380,7 +380,7 @@ def generate_and_upload(
                 except Exception as e:
                     logger.error(f"Instagram upload failed: {e}")
                     
-            if channel_config.get("enable_tiktok"):
+            if channel_config.enable_tiktok:
                 logger.info(f"Uploading to TikTok for {channel_name}...")
                 try:
                     tt_result = upload_to_tiktok(
