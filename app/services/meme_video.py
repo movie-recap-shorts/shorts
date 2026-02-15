@@ -37,6 +37,28 @@ from app.utils import utils
 PROJECT_ROOT = path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
 MEME_DIR = path.join(PROJECT_ROOT, "resource", "memes")
 OUTRO_DIR = path.join(PROJECT_ROOT, "resource", "outros")
+FONTS_DIR = path.join(PROJECT_ROOT, "resource", "fonts")
+
+
+def get_font_path() -> str:
+    """Get a font path that works on both macOS and Linux (GitHub Actions)."""
+    # 1. Bundled font (always shipped with repo)
+    bundled = path.join(FONTS_DIR, "Charm-Bold.ttf")
+    if os.path.exists(bundled):
+        return bundled
+    
+    # 2. Ubuntu / Debian DejaVu (GitHub Actions runners)
+    dejavu = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    if os.path.exists(dejavu):
+        return dejavu
+    
+    # 3. macOS system font
+    mac_font = "/System/Library/Fonts/Helvetica.ttc"
+    if os.path.exists(mac_font):
+        return mac_font
+    
+    # 4. Last resort — let Pillow try to find something
+    return "DejaVuSans-Bold"
 
 
 # Hook text templates per channel type
@@ -221,21 +243,23 @@ def create_outro_video(
         ).with_duration(duration)
         
         # "Like & Subscribe" text
+        font_path = get_font_path()
         try:
-            txt = TextClip(
-                text="👍 LIKE & SUBSCRIBE! 🔔",
-                font_size=55,
-                color="white",
-                font="Arial",
-                stroke_color="black",
-                stroke_width=2,
-            ).with_duration(duration).with_position("center")
-        except Exception:
-            # Fallback without specific font
             txt = TextClip(
                 text="LIKE & SUBSCRIBE!",
                 font_size=55,
                 color="white",
+                font=font_path,
+                stroke_color="black",
+                stroke_width=2,
+            ).with_duration(duration).with_position("center")
+        except Exception:
+            # Fallback
+            txt = TextClip(
+                text="LIKE & SUBSCRIBE!",
+                font_size=55,
+                color="white",
+                font=font_path,
                 stroke_color="black",
                 stroke_width=2,
             ).with_duration(duration).with_position("center")
@@ -379,12 +403,13 @@ def generate_meme_short(
             pass
         
         # Create subtitle overlay for hook text
+        font_path = get_font_path()
         try:
             hook_subtitle = TextClip(
                 text=hook_text,
                 font_size=50,
                 color="white",
-                font="Arial",
+                font=font_path,
                 stroke_color="black",
                 stroke_width=3,
                 method="caption",
@@ -397,6 +422,7 @@ def generate_meme_short(
                 text=hook_text,
                 font_size=45,
                 color="white",
+                font=font_path,
                 stroke_color="black",
                 stroke_width=2,
             ).with_duration(min(hook_audio.duration + 0.5, topic_clip.duration)).with_position("center")
@@ -428,10 +454,10 @@ def generate_meme_short(
         
         try:
             outro_text = TextClip(
-                text="👍 LIKE & SUBSCRIBE! 🔔",
+                text="LIKE & SUBSCRIBE!",
                 font_size=55,
                 color="white",
-                font="Arial",
+                font=font_path,
                 stroke_color="black",
                 stroke_width=2,
                 text_align="center",
@@ -441,6 +467,7 @@ def generate_meme_short(
                 text="LIKE & SUBSCRIBE!",
                 font_size=55,
                 color="white",
+                font=font_path,
                 stroke_color="black",
                 stroke_width=2,
             ).with_duration(outro_duration).with_position("center")
