@@ -2,8 +2,8 @@ name: Motivation Shorts Automation
 
 on:
   schedule:
-    # Every 15 minutes (offset by 7 min from movies) = 96 runs/day ≈ 100 videos/day
-    - cron: '7/15 * * * *'
+    # Using off-peak minutes to avoid GitHub Actions scheduling delays
+    - cron: '3,18,33,48 * * * *'
   workflow_dispatch:  # Allows manual run from GitHub interface
 
 concurrency:

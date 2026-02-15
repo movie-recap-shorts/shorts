@@ -2,8 +2,8 @@ name: Movies Shorts Automation
 
 on:
   schedule:
-    # Every 15 minutes = 96 runs/day ≈ 100 videos/day
-    - cron: '*/15 * * * *'
+    # Using off-peak minutes to avoid GitHub Actions scheduling delays
+    - cron: '13,28,43,58 * * * *'
   workflow_dispatch:  # Allows manual run from GitHub interface
 
 concurrency:
