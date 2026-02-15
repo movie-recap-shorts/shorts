@@ -478,6 +478,19 @@ def main():
     )
     
     parser.add_argument(
+        '--catchup',
+        action='store_true',
+        help='Enable catch-up mode for missed slots'
+    )
+    
+    parser.add_argument(
+        '--limit',
+        type=int,
+        default=1,
+        help='Maximum number of catch-up videos to generate (default: 1)'
+    )
+    
+    parser.add_argument(
         '--dry-run',
         action='store_true',
         help='Generate video but do not upload'
@@ -578,18 +591,18 @@ def main():
         cache = get_topic_cache()
         last_run = cache.get_last_usage_time(args.channel)
         
-        num_videos = 1
-        if last_run:
+        num_videos = args.limit
+        if args.catchup and last_run:
             # We want to maintain a frequency of 1 video per 15 minutes
             now = datetime.now()
             # Ensure last_run is aware if it's not (TopicCache uses local time)
             elapsed_seconds = (now - last_run).total_seconds()
             
             # If more than 15 minutes have passed, calculate how many videos we "missed"
-            # We cap it at 6 videos per run (1.5 hours worth) to avoid job timeouts
+            # We cap it at the specified limit (default 1) or a reasonable max
             missed_slots = int(elapsed_seconds // (15 * 60))
             if missed_slots > 1:
-                num_videos = min(6, missed_slots)
+                num_videos = min(args.limit if args.limit > 1 else 6, missed_slots)
                 logger.info(f"🚀 Catch-up mode: {missed_slots} slots missed since last run ({last_run.strftime('%H:%M')}). Generating {num_videos} videos.")
 
         total_success = 0

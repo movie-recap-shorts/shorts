@@ -10,12 +10,9 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 
 from loguru import logger
-try:
-    from instagrapi import Client
-    INSTAGRAPI_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     INSTAGRAPI_AVAILABLE = False
-    logger.warning("instagrapi library not installed. Run: pip install instagrapi")
+    logger.warning(f"instagrapi library not found or import failed: {e}. Run: pip install instagrapi")
 
 
 class InstagramUploader:
