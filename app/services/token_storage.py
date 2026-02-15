@@ -6,6 +6,7 @@ from typing import Optional, Dict, Any
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from loguru import logger
+from typing import Tuple
 
 class TokenStorage:
     """
