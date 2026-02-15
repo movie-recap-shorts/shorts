@@ -69,7 +69,8 @@ def generate_meme_and_upload(
     channel_manager: ChannelManager,
     topic: Optional[str] = None,
     dry_run: bool = False,
-    ignore_interval: bool = False
+    ignore_interval: bool = False,
+    ignore_schedule: bool = False
 ) -> bool:
     """
     Generate a meme-surprise video and upload it to YouTube.
@@ -78,8 +79,12 @@ def generate_meme_and_upload(
     logger.info(f"Starting MEME video generation for channel: {channel_name}")
     
     # Check rate limits
-    if not dry_run and not channel_manager.can_upload(channel_name, ignore_interval=ignore_interval):
-        logger.warning(f"Rate limit exceeded for {channel_name}, skipping...")
+    if not dry_run and not channel_manager.can_upload(
+        channel_name, 
+        ignore_interval=ignore_interval,
+        ignore_schedule=ignore_schedule
+    ):
+        logger.warning(f"Upload criteria not met for {channel_name}, skipping...")
         return False
     
     # Get channel config
@@ -214,7 +219,8 @@ def generate_and_upload(
     channel_manager: ChannelManager,
     topic: Optional[str] = None,
     dry_run: bool = False,
-    ignore_interval: bool = False
+    ignore_interval: bool = False,
+    ignore_schedule: bool = False
 ) -> bool:
     """
     Generate a video and upload it to YouTube.
@@ -231,8 +237,12 @@ def generate_and_upload(
     logger.info(f"Starting video generation for channel: {channel_name}")
     
     # Check rate limits
-    if not dry_run and not channel_manager.can_upload(channel_name, ignore_interval=ignore_interval):
-        logger.warning(f"Rate limit exceeded for {channel_name}, skipping...")
+    if not dry_run and not channel_manager.can_upload(
+        channel_name, 
+        ignore_interval=ignore_interval,
+        ignore_schedule=ignore_schedule
+    ):
+        logger.warning(f"Upload criteria not met for {channel_name}, skipping...")
         return False
     
     # Get channel config
@@ -497,6 +507,12 @@ def main():
     )
     
     parser.add_argument(
+        '--ignore-schedule',
+        action='store_true',
+        help='Ignore channel schedule and upload immediately'
+    )
+    
+    parser.add_argument(
         '--list-channels',
         action='store_true',
         help='List all configured channels'
@@ -616,7 +632,8 @@ def main():
                     channel_manager=channel_manager,
                     topic=args.topic,
                     dry_run=args.dry_run,
-                    ignore_interval=(num_videos > 1)
+                    ignore_interval=(num_videos > 1),
+                    ignore_schedule=args.ignore_schedule
                 )
             else:
                 success = generate_and_upload(
@@ -624,7 +641,8 @@ def main():
                     channel_manager=channel_manager,
                     topic=args.topic,
                     dry_run=args.dry_run,
-                    ignore_interval=(num_videos > 1)
+                    ignore_interval=(num_videos > 1),
+                    ignore_schedule=args.ignore_schedule
                 )
             
             if success:

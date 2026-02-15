@@ -16,6 +16,7 @@ from loguru import logger
 
 from app.services.youtube_uploader import YouTubeUploader
 from app.services.script_cache import get_topic_cache
+from app.services.scheduler import ShortsScheduler
 
 
 @dataclass
@@ -67,7 +68,8 @@ class ChannelManager:
     def __init__(
         self, 
         config_file: str = "./config/channels.json",
-        credentials_dir: str = "./credentials"
+        credentials_dir: str = "./credentials",
+        timezone: str = "Europe/Istanbul"
     ):
         """
         Initialize the channel manager.
@@ -75,9 +77,11 @@ class ChannelManager:
         Args:
             config_file: Path to channels configuration file
             credentials_dir: Directory containing OAuth credentials
+            timezone: Timezone for schedule checking
         """
         self.config_file = Path(config_file)
         self.credentials_dir = Path(credentials_dir)
+        self.timezone = timezone
         self.channels: Dict[str, ChannelConfig] = {}
         self.uploaders: Dict[str, YouTubeUploader] = {}
         self.upload_history: Dict[str, List[datetime]] = {}
@@ -227,19 +231,58 @@ class ChannelManager:
         
         return selected_topic
     
-    def can_upload(self, channel_name: str, ignore_interval: bool = False) -> bool:
+    def check_schedule(self, channel_name: str) -> bool:
         """
-        Check if channel can upload based on rate limits.
+        Check if the current time matches the channel's schedule.
+        Returns True if within a 15-minute window of a scheduled slot.
+        """
+        channel = self.channels.get(channel_name)
+        if not channel or not channel.schedule:
+            return True  # No schedule means always on schedule
+            
+        try:
+            from apscheduler.triggers.cron import CronTrigger
+            from datetime import datetime, timedelta
+            
+            # Parse cron
+            trigger = CronTrigger.from_crontab(channel.schedule, timezone=self.timezone)
+            
+            # Get current time in specified timezone
+            import pytz
+            tz = pytz.timezone(self.timezone)
+            now = datetime.now(tz)
+            
+            # Standard approach: check if trigger fires within [now - 14m, now + 1m]
+            start_window = now - timedelta(minutes=14)
+            next_fire = trigger.get_next_fire_time(None, start_window)
+            
+            if next_fire and next_fire <= (now + timedelta(minutes=1)):
+                return True
+                
+            return False
+        except Exception as e:
+            logger.error(f"Error checking schedule for {channel_name}: {e}")
+            return True # Fallback to true on error to avoid blocking valid runs
+
+    def can_upload(self, channel_name: str, ignore_interval: bool = False, ignore_schedule: bool = False) -> bool:
+        """
+        Check if channel can upload based on rate limits and schedule.
         
         Args:
             channel_name: Name of the channel
             ignore_interval: If True, bypass the minimum time between uploads check
+            ignore_schedule: If True, bypass the cron schedule check
             
         Returns:
             True if upload is allowed
         """
         channel = self.channels.get(channel_name)
         if not channel:
+            return False
+            
+        # 1. Check Schedule (if not ignored)
+        if not ignore_schedule and not self.check_schedule(channel_name):
+            logger.info(f"Channel {channel_name} is not on schedule, skipping.")
             return False
         
         history = self.upload_history.get(channel_name, [])
