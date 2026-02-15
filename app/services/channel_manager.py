@@ -45,6 +45,10 @@ class ChannelConfig:
     min_upload_interval_minutes: int = 30
     daily_video_limit: int = 3
     
+    # Cross-platform settings
+    enable_tiktok: bool = False
+    enable_instagram: bool = False
+    
     def __post_init__(self):
         if not self.description_template:
             self.description_template = (

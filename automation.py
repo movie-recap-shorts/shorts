@@ -37,6 +37,8 @@ from app.services.scheduler import ShortsScheduler
 from app.services.youtube_uploader import YouTubeUploader
 from app.services import task as video_task, llm
 from app.services.meme_video import generate_meme_short
+from app.services.instagram_uploader import upload_video_to_instagram
+from app.services.tiktok_uploader import upload_to_tiktok
 from app.models.schema import VideoParams
 
 
@@ -164,7 +166,39 @@ def generate_meme_and_upload(
             video_id = upload_result.get('id')
             logger.success(f"Meme video uploaded! ID: {video_id}")
             logger.info(f"URL: https://youtube.com/watch?v={video_id}")
+            
+            # Record upload for rate limiting
             channel_manager.record_upload(channel_name)
+            
+            # --- CROSS-PLATFORM UPLOAD (TikTok & Instagram) ---
+            channel_config = channel_manager.get_channel_config(channel_name)
+            
+            if channel_config.get("enable_instagram"):
+                logger.info(f"Uploading to Instagram Reels for {channel_name}...")
+                try:
+                    ig_result = upload_video_to_instagram(
+                        video_path=video_path,
+                        caption=f"{title}\n\n{description}",
+                        channel_name=channel_name
+                    )
+                    if ig_result:
+                        logger.success(f"Instagram Reels upload successful! URL: {ig_result.get('url')}")
+                except Exception as e:
+                    logger.error(f"Instagram upload failed: {e}")
+                    
+            if channel_config.get("enable_tiktok"):
+                logger.info(f"Uploading to TikTok for {channel_name}...")
+                try:
+                    tt_result = upload_to_tiktok(
+                        video_path=video_path,
+                        description=title,
+                        channel_name=channel_name
+                    )
+                    if tt_result:
+                        logger.success("TikTok upload successful!")
+                except Exception as e:
+                    logger.error(f"TikTok upload failed: {e}")
+            
             return True
         else:
             logger.error(f"Upload failed for {channel_name}")
@@ -324,11 +358,41 @@ def generate_and_upload(
         
         if upload_result:
             video_id = upload_result.get('id')
-            logger.success(f"Video uploaded! ID: {video_id}")
+            logger.success(f"YouTube upload successful! ID: {video_id}")
             logger.info(f"URL: https://youtube.com/watch?v={video_id}")
             
             # Record upload for rate limiting
             channel_manager.record_upload(channel_name)
+            
+            # --- CROSS-PLATFORM UPLOAD (TikTok & Instagram) ---
+            channel_config = channel_manager.get_channel_config(channel_name)
+            
+            if channel_config.get("enable_instagram"):
+                logger.info(f"Uploading to Instagram Reels for {channel_name}...")
+                try:
+                    ig_result = upload_video_to_instagram(
+                        video_path=video_path,
+                        caption=f"{title}\n\n{description}",
+                        channel_name=channel_name
+                    )
+                    if ig_result:
+                        logger.success(f"Instagram Reels upload successful! URL: {ig_result.get('url')}")
+                except Exception as e:
+                    logger.error(f"Instagram upload failed: {e}")
+                    
+            if channel_config.get("enable_tiktok"):
+                logger.info(f"Uploading to TikTok for {channel_name}...")
+                try:
+                    tt_result = upload_to_tiktok(
+                        video_path=video_path,
+                        description=title,
+                        channel_name=channel_name
+                    )
+                    if tt_result:
+                        logger.success("TikTok upload successful!")
+                except Exception as e:
+                    logger.error(f"TikTok upload failed: {e}")
+            
             return True
         else:
             logger.error(f"Upload failed for {channel_name}")
