@@ -2,9 +2,13 @@ name: Motivation Shorts Automation
 
 on:
   schedule:
-    # Runs every 15 minutes
-    - cron: '11,17,23,29,39,47,53,59 * * * *'
+    # Every 15 minutes (offset by 7 min from movies) = 96 runs/day ≈ 100 videos/day
+    - cron: '7/15 * * * *'
   workflow_dispatch:  # Allows manual run from GitHub interface
+
+concurrency:
+  group: motivation-shorts-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   motivation-channel:
