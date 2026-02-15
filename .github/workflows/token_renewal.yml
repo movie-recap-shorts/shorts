@@ -1,0 +1,52 @@
+name: YouTube Token Renewal
+
+on:
+  schedule:
+    - cron: '0 0 */3 * *' # Every 3 days
+  workflow_dispatch:
+
+jobs:
+  renew:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Setup motivation_en Environment
+        env:
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
+          CHANNEL_NAME: motivation_en
+        run: python scripts/github_env_setup.py
+
+      - name: Renew motivation_en Token
+        env:
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          CHANNEL_NAME: motivation_en
+        run: python scripts/renew_tokens.py
+
+      - name: Setup movies_en Environment
+        env:
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
+          CHANNEL_NAME: movies_en
+        run: python scripts/github_env_setup.py
+
+      - name: Renew movies_en Token
+        env:
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          CHANNEL_NAME: movies_en
+        run: python scripts/renew_tokens.py
