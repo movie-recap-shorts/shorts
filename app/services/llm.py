@@ -468,6 +468,80 @@ Please note that you must use English for generating video search terms; Chinese
     return search_terms
 
 
+def generate_viral_hook(topic: str, language: str = "en") -> str:
+    """
+    Generate a short, viral hook (3-5 seconds of speech) for a video topic.
+    """
+    lang_name = "English" if language == "en" else "Turkish" if language == "tr" else language
+    
+    prompt = f"""
+# Role: Viral Short-Form Video Expert
+## Task: Create a 1-sentence "Hook" for a YouTube Short video on the topic: "{topic}"
+
+## Constraints:
+1. length: 5-8 words total.
+2. duration: Must take 2-4 seconds to speak.
+3. tone: High-energy, curious, or shocking.
+4. goal: Make the user STOP SCROLLING immediately.
+5. language: Respond ONLY in {lang_name}.
+6. formatting: Raw text only, no quotes, no emojis, no markdown.
+
+## Examples:
+- Wait for it... this scene is insane!
+- You won't believe what happens next...
+- Stop scrolling and listen to this!
+- This movie scene will blow your mind!
+
+Topic: {topic}
+Hook:""".strip()
+
+    for i in range(3):
+        hook = _generate_response(prompt).strip()
+        if hook and "Error:" not in hook:
+            # Clean up unwanted characters
+            hook = re.sub(r'["\'#*]', '', hook)
+            return hook
+    return "Wait for it... this is insane!"
+
+
+def generate_viral_title(topic: str, hook_text: str, language: str = "en") -> str:
+    """
+    Generate a clickable, viral title for a YouTube Short.
+    """
+    lang_name = "English" if language == "en" else "Turkish" if language == "tr" else language
+    
+    prompt = f"""
+# Role: Viral Video Marketing Expert
+## Task: Create a clickable title (max 60 chars) for a YouTube Short.
+
+## Context:
+- Topic: {topic}
+- Hook used: {hook_text}
+
+## Constraints:
+1. Max 60 characters.
+2. Include 1-2 relevant emojis.
+3. Must be in {lang_name}.
+4. Don't use generic words like "Video" or "Short".
+5. Use power words (SHOCKING, INSANE, NEVER SEEN, FINALLY).
+
+## Output:
+Raw text title only.
+
+Title:""".strip()
+
+    for i in range(3):
+        title = _generate_response(prompt).strip()
+        if title and "Error:" not in title:
+            # Clean up unwanted characters
+            title = re.sub(r'["#*]', '', title)
+            # Add #Shorts if not present
+            if "#Shorts" not in title:
+                title = f"{title} #Shorts"
+            return title[:100]
+    return f"🔥 {topic.title()} #Shorts"
+
+
 if __name__ == "__main__":
     video_subject = "生命的意义是什么"
     script = generate_script(

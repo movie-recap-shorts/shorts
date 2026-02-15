@@ -322,9 +322,12 @@ def generate_meme_short(
         topics = channel_config.get("topics", [])
         topic = random.choice(topics) if topics else "amazing viral moment"
     
-    hook_text = get_hook_text(channel_name)
+    # Generate a viral hook using AI (DeepSeek)
+    language = channel_config.get("language", "en")
+    hook_text = llm.generate_viral_hook(topic=topic, language=language)
+    
     logger.info(f"📝 Topic: {topic}")
-    logger.info(f"📝 Hook: {hook_text}")
+    logger.info(f"📝 AI Hook: {hook_text}")
     
     # 2. Generate hook audio (TTS)
     logger.info("🎙️ Generating hook audio...")

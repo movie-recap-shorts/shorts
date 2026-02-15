@@ -35,7 +35,7 @@ sys.path.insert(0, str(project_root))
 from app.services.channel_manager import ChannelManager, create_sample_config
 from app.services.scheduler import ShortsScheduler
 from app.services.youtube_uploader import YouTubeUploader
-from app.services import task as video_task
+from app.services import task as video_task, llm
 from app.services.meme_video import generate_meme_short
 from app.models.schema import VideoParams
 
@@ -122,21 +122,18 @@ def generate_meme_and_upload(
         
         logger.success(f"Meme video generated: {video_path} ({result.get('duration', 0):.1f}s)")
         
+        # AI-Generated Viral Title (DeepSeek)
+        title = llm.generate_viral_title(
+            topic=topic_used, 
+            hook_text=hook_text, 
+            language=channel.language
+        )
+        
+        logger.info(f"🏷️ AI Title: {title}")
+
         if dry_run:
             logger.info("Dry run mode - skipping upload")
             return True
-        
-        # Enhanced title for meme videos
-        def meme_title(topic_str: str, hook: str) -> str:
-            """Create a clickable title for meme-surprise videos."""
-            meme_emojis = ['😂', '🤣', '💀', '😱', '🤯', '😭', '🔥', '⚡']
-            emoji = random.choice(meme_emojis)
-            
-            # Use hook text as title (more engaging than topic)
-            base = hook if hook else topic_str
-            return f"{emoji} {base.title()} #Shorts"[:100]
-        
-        title = meme_title(topic_used, hook_text)
         
         description = channel.description_template.format(
             script_summary=hook_text
