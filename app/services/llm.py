@@ -542,6 +542,73 @@ Title:""".strip()
     return f"🔥 {topic.title()} #Shorts"
 
 
+def generate_stoic_script(topic: str, language: str = "en") -> str:
+    """
+    Generate a Stoic Wisdom / Billionaire Mindset script.
+    Format: Problem/Obsession -> Stoic Perspective -> Mindset Shift.
+    """
+    lang_name = "English" if language == "en" else "Turkish" if language == "tr" else language
+    
+    prompt = f"""
+# Role: Stoic Philosophy & Billionaire Mindset Coach
+## Task: Generate a transformation script (30-40 words) for a YouTube Short.
+
+## Topic: {topic}
+
+## Structure:
+1. Hook (The Struggle): A common modern obsession or pain point.
+2. The Wisdom: A quote or perspective from Stoicism (Marcus Aurelius, Seneca, Epictetus) or a Top 1% mindset.
+3. The Action: A direct call to shift the mindset.
+
+## Constraints:
+- Language: {lang_name}
+- Tone: Deep, calm, authoritative.
+- No markdown, no "Narrator:", no titles.
+- Max 3 sentences.
+
+Script:""".strip()
+
+    for i in range(3):
+        script = _generate_response(prompt).strip()
+        if script and "Error:" not in script:
+            return re.sub(r'["#*]', '', script)
+    return "The obstacle in the path becomes the path. Move forward."
+
+
+def generate_movie_secret_script(topic: str, language: str = "en") -> str:
+    """
+    Generate a "Did You Notice?" or "Movie Theory" script.
+    Format: Hook -> The Secret Detail -> Engagement Question.
+    """
+    lang_name = "English" if language == "en" else "Turkish" if language == "tr" else language
+    
+    prompt = f"""
+# Role: Movie Theory & Easter Egg Expert
+## Task: Generate a "Did you notice?" script (30-40 words) for a YouTube Short.
+
+## Movie Topic: {topic}
+
+## Structure:
+1. Hook: "Did you notice this in [Movie]?" or "Most people missed this detail..."
+2. The Secret: A mind-blowing detail, theory, or Easter egg related to the topic.
+3. Engagement: "Did you catch this? Let me know in the comments!"
+
+## Constraints:
+- Language: {lang_name}
+- Tone: High-energy, mysterious, fast-paced.
+- No markdown, no "Narrator:", no titles.
+- Max 3 sentences.
+
+Script:""".strip()
+
+    for i in range(3):
+        script = _generate_response(prompt).strip()
+        if script and "Error:" not in script:
+            return re.sub(r'["#*]', '', script)
+    return f"Did you notice this detail in {topic}? Most people missed it completely!"
+
+
+
 if __name__ == "__main__":
     video_subject = "生命的意义是什么"
     script = generate_script(

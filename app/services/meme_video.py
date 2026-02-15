@@ -61,6 +61,17 @@ def get_font_path() -> str:
     return "DejaVuSans-Bold"
 
 
+# Premium Color Palette for text randomization
+PREMIUM_COLORS = [
+    "#FFFFFF",  # White
+    "#F0F0F0",  # Off-white
+    "#FFFDD0",  # Cream
+    "#FFD700",  # Gold (subtle)
+    "#E6E6FA",  # Lavender
+    "#F5F5DC",  # Beige
+    "#F0FFF0",  # Honeydew
+]
+
 # Hook text templates per channel type
 HOOK_TEMPLATES = {
     "movies_en": [
@@ -324,7 +335,14 @@ def generate_meme_short(
     
     # Generate a viral hook using AI (DeepSeek)
     language = channel_config.get("language", "en")
-    hook_text = llm.generate_viral_hook(topic=topic, language=language)
+    
+    # Concept-specific script generation
+    if "motivation" in channel_name:
+        hook_text = llm.generate_stoic_script(topic=topic, language=language)
+    elif "movie" in channel_name:
+        hook_text = llm.generate_movie_secret_script(topic=topic, language=language)
+    else:
+        hook_text = llm.generate_viral_hook(topic=topic, language=language)
     
     logger.info(f"📝 Topic: {topic}")
     logger.info(f"📝 AI Hook: {hook_text}")
@@ -405,13 +423,16 @@ def generate_meme_short(
             # Audio is shorter than video - that's fine, video continues silently
             pass
         
-        # Create subtitle overlay for hook text
+        # RCP (Reuse Content Protection): Randomize text appearance
         font_path = get_font_path()
+        text_color = random.choice(PREMIUM_COLORS)
+        text_size = random.randint(48, 54)  # Slight variation
+        
         try:
             hook_subtitle = TextClip(
                 text=hook_text,
-                font_size=50,
-                color="white",
+                font_size=text_size,
+                color=text_color,
                 font=font_path,
                 stroke_color="black",
                 stroke_width=3,
@@ -423,15 +444,27 @@ def generate_meme_short(
             logger.warning(f"Subtitle creation failed, trying fallback: {e}")
             hook_subtitle = TextClip(
                 text=hook_text,
-                font_size=45,
-                color="white",
+                font_size=text_size - 5,
+                color=text_color,
                 font=font_path,
                 stroke_color="black",
                 stroke_width=2,
             ).with_duration(min(hook_audio.duration + 0.5, topic_clip.duration)).with_position("center")
         
+        # RCP (Reuse Content Protection): Random Zoom on topic clip
+        zoom_factor = random.uniform(1.0, 1.08)
+        if zoom_factor > 1.01:
+            topic_clip = topic_clip.resized(zoom_factor)
+            # Re-center if zoomed
+            w_diff = (topic_clip.w - video_width) / 2
+            h_diff = (topic_clip.h - video_height) / 2
+            topic_clip = topic_clip.cropped(x1=w_diff, y1=h_diff, x2=topic_clip.w-w_diff, y2=topic_clip.h-h_diff)
+        
         segment1 = CompositeVideoClip([topic_clip, hook_subtitle])
-        segment1 = segment1.with_audio(hook_audio_padded)
+        
+        # RCP: Subtle audio volume variation
+        audio_volume = random.uniform(0.95, 1.05)
+        segment1 = segment1.with_audio(hook_audio_padded.with_volume_scaled(audio_volume))
         
         # --- SEGMENT 2: Meme clip (with its own audio) ---
         meme_clip = VideoFileClip(meme_path)
