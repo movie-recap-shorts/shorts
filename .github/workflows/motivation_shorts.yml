@@ -47,7 +47,7 @@ jobs:
       env:
         PYTHONUNBUFFERED: "1"
       run: |
-        python automation.py --once --channel motivation_en
+        python automation.py --once --channel motivation_en --video-mode meme
 
     - name: Upload Logs (on failure)
       if: failure()

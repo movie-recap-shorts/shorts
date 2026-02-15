@@ -20,6 +20,7 @@ Usage:
 """
 
 import argparse
+import random
 import sys
 import uuid
 from pathlib import Path
@@ -35,6 +36,7 @@ from app.services.channel_manager import ChannelManager, create_sample_config
 from app.services.scheduler import ShortsScheduler
 from app.services.youtube_uploader import YouTubeUploader
 from app.services import task as video_task
+from app.services.meme_video import generate_meme_short
 from app.models.schema import VideoParams
 
 
@@ -58,6 +60,113 @@ def setup_logging():
         retention="30 days",
         level="DEBUG"
     )
+
+
+def generate_meme_and_upload(
+    channel_name: str,
+    channel_manager: ChannelManager,
+    topic: Optional[str] = None,
+    dry_run: bool = False
+) -> bool:
+    """
+    Generate a meme-surprise video and upload it to YouTube.
+    Uses the 3-segment format: [topic hook] → [meme clip] → [outro]
+    """
+    logger.info(f"Starting MEME video generation for channel: {channel_name}")
+    
+    # Check rate limits
+    if not dry_run and not channel_manager.can_upload(channel_name):
+        logger.warning(f"Rate limit exceeded for {channel_name}, skipping...")
+        return False
+    
+    # Get channel config
+    channel = channel_manager.get_channel(channel_name)
+    if not channel:
+        logger.error(f"Channel not found: {channel_name}")
+        return False
+    
+    # Build channel config dict for meme_video module
+    channel_config = {
+        "topics": channel.topics,
+        "voice": channel.voice,
+        "video_aspect": channel.video_aspect,
+        "tags": channel.tags,
+    }
+    
+    task_id = str(uuid.uuid4())
+    
+    try:
+        result = generate_meme_short(
+            task_id=task_id,
+            channel_name=channel_name,
+            channel_config=channel_config,
+            topic=topic,
+        )
+        
+        if not result or not result.get('videos'):
+            logger.error(f"Meme video generation failed for {channel_name}")
+            return False
+        
+        video_path = result['videos'][0]
+        hook_text = result.get('script', '')
+        topic_used = result.get('topic', '')
+        
+        logger.success(f"Meme video generated: {video_path} ({result.get('duration', 0):.1f}s)")
+        
+        if dry_run:
+            logger.info("Dry run mode - skipping upload")
+            return True
+        
+        # Enhanced title for meme videos
+        def meme_title(topic_str: str, hook: str) -> str:
+            """Create a clickable title for meme-surprise videos."""
+            meme_emojis = ['😂', '🤣', '💀', '😱', '🤯', '😭', '🔥', '⚡']
+            emoji = random.choice(meme_emojis)
+            
+            # Use hook text as title (more engaging than topic)
+            base = hook if hook else topic_str
+            return f"{emoji} {base.title()} #Shorts"[:100]
+        
+        title = meme_title(topic_used, hook_text)
+        
+        description = channel.description_template.format(
+            script_summary=hook_text
+        )
+        
+        # Get uploader and authenticate
+        uploader = channel_manager.get_uploader(channel_name)
+        if not uploader:
+            logger.error(f"Failed to get uploader for {channel_name}")
+            return False
+        
+        if not uploader.authenticate(interactive=False):
+            logger.error(f"Authentication failed for {channel_name}")
+            return False
+        
+        # Upload video
+        upload_result = uploader.upload_video(
+            video_path=video_path,
+            title=title,
+            description=description,
+            tags=channel.tags,
+            privacy_status=channel.default_privacy,
+            is_shorts=True,
+            notify_subscribers=channel.notify_subscribers
+        )
+        
+        if upload_result:
+            video_id = upload_result.get('id')
+            logger.success(f"Meme video uploaded! ID: {video_id}")
+            logger.info(f"URL: https://youtube.com/watch?v={video_id}")
+            channel_manager.record_upload(channel_name)
+            return True
+        else:
+            logger.error(f"Upload failed for {channel_name}")
+            return False
+            
+    except Exception as e:
+        logger.exception(f"Error during meme generation/upload: {e}")
+        return False
 
 
 def generate_and_upload(
@@ -273,6 +382,13 @@ def main():
     )
     
     parser.add_argument(
+        '--video-mode',
+        choices=['standard', 'meme'],
+        default='meme',
+        help='Video format: standard (LLM script) or meme (meme-surprise format)'
+    )
+    
+    parser.add_argument(
         '--once',
         action='store_true',
         help='Generate and upload one video (shortcut for --mode once)'
@@ -380,12 +496,24 @@ def main():
                 logger.error("No channels available")
                 return
         
-        success = generate_and_upload(
-            channel_name=args.channel,
-            channel_manager=channel_manager,
-            topic=args.topic,
-            dry_run=args.dry_run
-        )
+        # Choose generation function based on video mode
+        video_mode = getattr(args, 'video_mode', 'meme')
+        
+        if video_mode == 'meme':
+            logger.info(f"Using MEME-SURPRISE video format for {args.channel}")
+            success = generate_meme_and_upload(
+                channel_name=args.channel,
+                channel_manager=channel_manager,
+                topic=args.topic,
+                dry_run=args.dry_run
+            )
+        else:
+            success = generate_and_upload(
+                channel_name=args.channel,
+                channel_manager=channel_manager,
+                topic=args.topic,
+                dry_run=args.dry_run
+            )
         
         sys.exit(0 if success else 1)
     
