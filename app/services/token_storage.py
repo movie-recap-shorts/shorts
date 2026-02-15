@@ -25,8 +25,11 @@ class TokenStorage:
 
     def _authenticate(self) -> bool:
         """Authenticate with Google Sheets API."""
-        if not self.creds_json or not self.sheet_id:
-            logger.warning("GOOGLE_SHEETS_CREDENTIALS or SHEET_ID not set. Token storage disabled.")
+        if not self.creds_json:
+            logger.warning("GOOGLE_SHEETS_CREDENTIALS not set. Token storage disabled.")
+            return False
+        if not self.sheet_id:
+            logger.warning("SHEET_ID not set. Token storage disabled.")
             return False
             
         try:
