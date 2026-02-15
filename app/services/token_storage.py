@@ -44,83 +44,68 @@ class TokenStorage:
                 return None
                 
         try:
-            # Open the spreadsheet by ID
             sh = self.client.open_by_key(self.sheet_id)
-            
-            # Try to get the 'Tokens' worksheet, or use the first one
             try:
                 worksheet = sh.worksheet("Tokens")
             except gspread.WorksheetNotFound:
-                # If 'Tokens' doesn't exist, check if we can use the first sheet or create one
                 worksheet = sh.sheet1
                 if worksheet.title != "Tokens":
-                    # Initialize headers if it's a new/empty sheet
                     if not worksheet.get_all_values():
-                        worksheet.update('A1:C1', [['Channel Name', 'Token JSON', 'Last Updated']])
+                        worksheet.update('A1:D1', [['Channel Name', 'Token JSON', 'Client Secret JSON', 'Last Updated']])
                         worksheet.update_title("Tokens")
-            
             return worksheet
         except Exception as e:
             logger.error(f"Failed to access worksheet: {e}")
             return None
 
-    def save_token(self, channel_name: str, token_data: Dict[str, Any]) -> bool:
-        """
-        Save or update a token in the Google Sheet.
-        
-        Args:
-            channel_name: Name of the YouTube channel (e.g., 'movies_en')
-            token_data: Dictionary containing the token data
-        """
+    def save_token(self, channel_name: str, token_data: Dict[str, Any], client_secret_data: Optional[Dict[str, Any]] = None) -> bool:
+        """Save token and optional client secret to Google Sheet."""
         worksheet = self._get_worksheet()
         if not worksheet:
             return False
             
         try:
             token_json = json.dumps(token_data)
+            secret_json = json.dumps(client_secret_data) if client_secret_data else ""
             timestamp = datetime.datetime.now().isoformat()
             
-            # Check if channel already exists
             cell = worksheet.find(channel_name)
             
             if cell:
-                # Update existing row
                 row_num = cell.row
                 worksheet.update_cell(row_num, 2, token_json)
-                worksheet.update_cell(row_num, 3, timestamp)
-                logger.info(f"Updated token for {channel_name} in Google Sheet")
+                if secret_json:
+                    worksheet.update_cell(row_num, 3, secret_json)
+                worksheet.update_cell(row_num, 4, timestamp)
+                logger.info(f"Updated credentials for {channel_name} in Google Sheet")
             else:
-                # Append new row
-                worksheet.append_row([channel_name, token_json, timestamp])
-                logger.info(f"Saved new token for {channel_name} to Google Sheet")
+                worksheet.append_row([channel_name, token_json, secret_json, timestamp])
+                logger.info(f"Saved new credentials for {channel_name} to Google Sheet")
                 
             return True
         except Exception as e:
-            logger.error(f"Failed to save token to Google Sheet: {e}")
+            logger.error(f"Failed to save to Google Sheet: {e}")
             return False
 
-    def get_token(self, channel_name: str) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve a token from the Google Sheet.
-        
-        Args:
-            channel_name: Name of the YouTube channel
-            
-        Returns:
-            Token data dictionary or None if not found
-        """
+    def get_credentials(self, channel_name: str) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
+        """Retrieve token and client secret from Google Sheet."""
         worksheet = self._get_worksheet()
         if not worksheet:
-            return None
+            return None, None
             
         try:
             cell = worksheet.find(channel_name)
             if cell:
-                token_json = worksheet.cell(cell.row, 2).value
-                return json.loads(token_json)
+                row_data = worksheet.row_values(cell.row)
+                token_json = row_data[1] if len(row_data) > 1 else None
+                secret_json = row_data[2] if len(row_data) > 2 else None
+                
+                token_data = json.loads(token_json) if token_json else None
+                secret_data = json.loads(secret_json) if secret_json and secret_json.strip() else None
+                return token_data, secret_data
             else:
-                logger.warning(f"No token found for {channel_name} in Google Sheet")
-                return None
+                logger.warning(f"No credentials found for {channel_name} in Google Sheet")
+                return None, None
         except Exception as e:
-            logger.error(f"Failed to retrieve token from Google Sheet: {e}")
-            return None
+            logger.error(f"Failed to retrieve from Google Sheet: {e}")
+            return None, None

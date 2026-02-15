@@ -75,16 +75,9 @@ class YouTubeUploader:
         self.token_file = self.credentials_dir / f"{channel_name}_token.json"
         self.client_secret_file = self.credentials_dir / f"{channel_name}_client_secret.json"
         
-    def authenticate(self, interactive: bool = True, use_console: bool = False) -> bool:
+    def authenticate(self, interactive: bool = True, use_console: bool = False, force_consent: bool = False) -> bool:
         """
         Authenticate with YouTube API using OAuth 2.0.
-        
-        Args:
-            interactive: If True, opens browser or console for authentication
-            use_console: If True, uses console-based authentication (copy-paste code)
-            
-        Returns:
-            True if authentication successful, False otherwise
         """
         try:
             # Try to load existing token
@@ -94,23 +87,23 @@ class YouTubeUploader:
                 )
             
             # Check if credentials need refresh or re-authentication
+            # Force consent if requested
+            if force_consent:
+                self.credentials = None
+
             if not self.credentials or not self.credentials.valid:
                 if self.credentials and self.credentials.expired and self.credentials.refresh_token:
                     logger.info(f"Refreshing token for channel: {self.channel_name}")
                     self.credentials.refresh(Request())
                 elif interactive:
                     logger.info(f"Starting OAuth flow for channel: {self.channel_name}")
-                    if not self.client_secret_file.exists():
-                        logger.error(f"Client secret file not found: {self.client_secret_file}")
-                        return False
-                    
+                    prompt = 'consent' if force_consent else None
                     flow = InstalledAppFlow.from_client_secrets_file(
                         str(self.client_secret_file), SCOPES
                     )
                     if use_console:
-                        # Manual console flow: force redirect_uri to match config
                         flow.redirect_uri = 'http://localhost'
-                        auth_url, _ = flow.authorization_url(prompt='consent')
+                        auth_url, _ = flow.authorization_url(prompt='consent' if force_consent else 'select_account')
                         print(f"Please visit this URL: {auth_url}")
                         print("AFTER authorizing, you will be redirected to 'http://localhost/?code=...'")
                         print("Copy the EVERYTHING after 'code=' from the address bar and paste it here.")

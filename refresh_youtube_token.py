@@ -12,9 +12,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from app.services.youtube_uploader import YouTubeUploader
 from loguru import logger
 
-def refresh_token(channel_name: str):
+def refresh_token(channel_name: str, force_consent: bool = False):
     """Refresh token for a specific channel"""
-    logger.info(f"Refreshing token for channel: {channel_name}")
+    logger.info(f"Refreshing token for channel: {channel_name} (force_consent={force_consent})")
     
     uploader = YouTubeUploader(
         credentials_dir='./credentials',
@@ -22,7 +22,7 @@ def refresh_token(channel_name: str):
     )
     
     # This will open a browser window for authentication
-    success = uploader.authenticate(interactive=True)
+    success = uploader.authenticate(interactive=True, force_consent=force_consent)
     
     if success:
         logger.success(f"✅ Token refreshed successfully for {channel_name}")
@@ -38,14 +38,19 @@ def refresh_token(channel_name: str):
             from app.services.token_storage import TokenStorage
             storage = TokenStorage()
             
-            # Read the fresh token from the file
+            # Read fresh token and secret
             with open(uploader.token_file, 'r') as f:
                 token_data = json.load(f)
-                
-            if storage.save_token(channel_name, token_data):
-                logger.success(f"✅ Saved new token to Google Sheets for {channel_name}")
+            
+            secret_data = None
+            if uploader.client_secret_file.exists():
+                with open(uploader.client_secret_file, 'r') as f:
+                    secret_data = json.load(f)
+
+            if storage.save_token(channel_name, token_data, secret_data):
+                logger.success(f"✅ Saved new credentials to Google Sheets for {channel_name}")
             else:
-                logger.error("❌ Failed to save token to Google Sheets (check configuration)")
+                logger.error("❌ Failed to save to Google Sheets")
         except Exception as e:
             logger.error(f"Error saving to Google Sheets: {e}")
             
@@ -55,14 +60,15 @@ def refresh_token(channel_name: str):
         return False
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        # Refresh specific channel
-        channel = sys.argv[1]
-        refresh_token(channel)
+    import argparse
+    parser = argparse.ArgumentParser(description="Refresh YouTube OAuth tokens")
+    parser.add_argument("channel", nargs="?", help="Channel name (movies_en or motivation_en)")
+    parser.add_argument("--force", action="store_true", help="Force consent (get fresh refresh token)")
+    
+    args = parser.parse_args()
+    
+    if args.channel:
+        refresh_token(args.channel, force_consent=args.force)
     else:
-        # Refresh all channels
-        print("Available channels:")
-        print("1. movies_en")
-        print("2. motivation_en")
-        print("\nUsage: python3 refresh_youtube_token.py <channel_name>")
-        print("Example: python3 refresh_youtube_token.py movies_en")
+        print("Available channels: movies_en, motivation_en")
+        print("Usage: python3 refresh_youtube_token.py <channel_name> [--force]")

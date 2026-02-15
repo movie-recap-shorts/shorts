@@ -28,19 +28,32 @@ def upload_local_tokens():
     
     for channel in channels:
         token_file = creds_dir / f"{channel}_token.json"
+        secret_file = creds_dir / f"{channel}_client_secret.json"
+        
+        token_data = None
+        secret_data = None
+        
         if token_file.exists():
             try:
                 with open(token_file, 'r') as f:
                     token_data = json.load(f)
-                
-                logger.info(f"📤 Uploading current token for {channel} to Google Sheets...")
-                if storage.save_token(channel, token_data):
-                    logger.success(f"✅ Successfully uploaded {channel} token.")
-                    found_any = True
-                else:
-                    logger.error(f"❌ Failed to upload {channel} token.")
             except Exception as e:
-                logger.error(f"Error processing {channel}: {e}")
+                logger.error(f"Error reading token for {channel}: {e}")
+                
+        if secret_file.exists():
+            try:
+                with open(secret_file, 'r') as f:
+                    secret_data = json.load(f)
+            except Exception as e:
+                logger.error(f"Error reading secret for {channel}: {e}")
+
+        if token_data:
+            logger.info(f"📤 Uploading credentials for {channel} to Google Sheets...")
+            if storage.save_token(channel, token_data, secret_data):
+                logger.success(f"✅ Successfully uploaded {channel} credentials.")
+                found_any = True
+            else:
+                logger.error(f"❌ Failed to upload {channel} credentials.")
         else:
             logger.warning(f"No local token found for {channel} at {token_file}")
 
