@@ -50,6 +50,9 @@ class ChannelConfig:
     enable_tiktok: bool = False
     enable_instagram: bool = False
     
+    # Affiliate Marketing
+    affiliate_links: Dict[str, str] = field(default_factory=dict)
+    
     def __post_init__(self):
         if not self.description_template:
             self.description_template = (
@@ -132,6 +135,9 @@ class ChannelManager:
                     'description_template': ch.description_template,
                     'min_upload_interval_minutes': ch.min_upload_interval_minutes,
                     'daily_video_limit': ch.daily_video_limit,
+                    'enable_tiktok': ch.enable_tiktok,
+                    'enable_instagram': ch.enable_instagram,
+                    'affiliate_links': ch.affiliate_links,
                 }
                 for ch in self.channels.values()
             ]
@@ -264,6 +270,36 @@ class ChannelManager:
         except Exception as e:
             logger.error(f"Error checking schedule for {channel_name}: {e}")
             return True # Fallback to true on error to avoid blocking valid runs
+
+    def get_affiliate_link(self, channel_name: str, script_text: str) -> str:
+        """
+        Get a relevant affiliate link based on keywords in the script.
+        
+        Args:
+            channel_name: Name of the channel
+            script_text: The script/hook text to analyze
+            
+        Returns:
+            Affiliate link URL
+        """
+        channel = self.get_channel(channel_name)
+        if not channel or not channel.affiliate_links:
+            return ""
+            
+        script_lower = script_text.lower()
+        
+        # Check for keyword matches
+        for keywords, link in channel.affiliate_links.items():
+            if keywords == "default":
+                continue
+                
+            # Split comma-separated keywords
+            keyword_list = [k.strip() for k in keywords.split(',')]
+            if any(k in script_lower for k in keyword_list):
+                return link
+                
+        # Fallback to default
+        return channel.affiliate_links.get("default", "")
 
     def can_upload(self, channel_name: str, ignore_interval: bool = False, ignore_schedule: bool = False) -> bool:
         """

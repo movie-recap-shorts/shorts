@@ -142,9 +142,12 @@ def generate_meme_and_upload(
             logger.info("Dry run mode - skipping upload")
             return True
         
+        # Get relevant affiliate link
+        affiliate_link = channel_manager.get_affiliate_link(channel_name, hook_text)
+        
         description = channel.description_template.format(
             script_summary=hook_text
-        )
+        ).replace("{{relevant_affiliate_link}}", affiliate_link)
         
         # Get uploader and authenticate
         uploader = channel_manager.get_uploader(channel_name)
@@ -341,9 +344,12 @@ def generate_and_upload(
         
         # Create description from script
         script_summary = video_script[:500] if video_script else ""
+        # Get relevant affiliate link
+        affiliate_link = channel_manager.get_affiliate_link(channel_name, script_text)
+        
         description = channel.description_template.format(
             script_summary=script_summary
-        )
+        ).replace("{{relevant_affiliate_link}}", affiliate_link)
         
         # Get uploader and authenticate
         uploader = channel_manager.get_uploader(channel_name)

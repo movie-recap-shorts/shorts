@@ -37,11 +37,16 @@
                 "shorts",
                 "viral"
             ],
-            "description_template": "🎬 {script_summary}\n\n🍿 Did you catch this secret detail? Let us know in the comments!\n\n👇 Subscribe for daily hidden movie secrets!\n\n🔥 Best Movie Deals (Affiliate): https://amzn.to/example-movies\n\n#Shorts #MovieSecrets #DidYouNotice #FilmTheory #Cinema #HiddenDetails #EasterEggs",
+            "description_template": "🎬 {script_summary}\n\n🍿 Did you catch this secret detail? Let us know in the comments!\n\n👇 Subscribe for daily hidden movie secrets!\n\n🔥 Recommended for Movie Fans: {{relevant_affiliate_link}}\n\n#Shorts #MovieSecrets #DidYouNotice #FilmTheory #Cinema #HiddenDetails #EasterEggs",
             "min_upload_interval_minutes": 10,
             "daily_video_limit": 10,
             "enable_tiktok": false,
-            "enable_instagram": false
+            "enable_instagram": false,
+            "affiliate_links": {
+                "movie,film,cinema,mistake,secret": "https://amzn.to/example-movie-deals",
+                "equipment,camera,setup,gear": "https://amzn.to/example-film-gear",
+                "default": "https://amzn.to/example-default-movies"
+            }
         },
         {
             "name": "motivation_en",
@@ -80,11 +85,16 @@
                 "shorts",
                 "viral"
             ],
-            "description_template": "💪 {script_summary}\n\n🔥 Shift your mindset today and join the top 1%.\n\n👇 Subscribe for daily stoic wisdom and billionaire tips!\n\n📚 Recommended Stoic Books (Affiliate): https://amzn.to/example-stoic\n\n#Shorts #Stoicism #Motivation #Success #Mindset #SelfImprovement #Wisdom #Hustle #BillionaireMindset",
+            "description_template": "💪 {script_summary}\n\n🔥 Shift your mindset today and join the top 1%.\n\n👇 Subscribe for daily stoic wisdom and billionaire tips!\n\n📚 Recommended for You: {{relevant_affiliate_link}}\n\n#Shorts #Stoicism #Motivation #Success #Mindset #SelfImprovement #Wisdom #Hustle #BillionaireMindset",
             "min_upload_interval_minutes": 10,
             "daily_video_limit": 10,
             "enable_tiktok": true,
-            "enable_instagram": true
+            "enable_instagram": true,
+            "affiliate_links": {
+                "stoic,philosophy,marcus,wisdom,seneca": "https://amzn.to/example-stoic-books",
+                "success,money,billionaire,habit,focus": "https://amzn.to/example-success-tools",
+                "default": "https://amzn.to/example-default-motivation"
+            }
         }
     ]
 }
