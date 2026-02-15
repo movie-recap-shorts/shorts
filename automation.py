@@ -85,6 +85,14 @@ def generate_meme_and_upload(
         logger.error(f"Channel not found: {channel_name}")
         return False
     
+    # Select topic using smart history logic
+    if not topic:
+        topic = channel_manager.get_random_topic(channel_name)
+    
+    if not topic:
+        logger.error(f"No topics configured for channel: {channel_name}")
+        return False
+
     # Build channel config dict for meme_video module
     channel_config = {
         "topics": channel.topics,
@@ -92,7 +100,7 @@ def generate_meme_and_upload(
         "video_aspect": channel.video_aspect,
         "tags": channel.tags,
     }
-    
+
     task_id = str(uuid.uuid4())
     
     try:
@@ -499,23 +507,57 @@ def main():
         # Choose generation function based on video mode
         video_mode = getattr(args, 'video_mode', 'meme')
         
-        if video_mode == 'meme':
-            logger.info(f"Using MEME-SURPRISE video format for {args.channel}")
-            success = generate_meme_and_upload(
-                channel_name=args.channel,
-                channel_manager=channel_manager,
-                topic=args.topic,
-                dry_run=args.dry_run
-            )
-        else:
-            success = generate_and_upload(
-                channel_name=args.channel,
-                channel_manager=channel_manager,
-                topic=args.topic,
-                dry_run=args.dry_run
-            )
+        # Catch-up logic for delayed runs (1 video per 15 minutes)
+        # --------------------------------------------------------
+        from app.services.script_cache import get_topic_cache
+        from datetime import datetime, timezone
         
-        sys.exit(0 if success else 1)
+        cache = get_topic_cache()
+        last_run = cache.get_last_usage_time(args.channel)
+        
+        num_videos = 1
+        if last_run:
+            # We want to maintain a frequency of 1 video per 15 minutes
+            now = datetime.now()
+            # Ensure last_run is aware if it's not (TopicCache uses local time)
+            elapsed_seconds = (now - last_run).total_seconds()
+            
+            # If more than 15 minutes have passed, calculate how many videos we "missed"
+            # We cap it at 6 videos per run (1.5 hours worth) to avoid job timeouts
+            missed_slots = int(elapsed_seconds // (15 * 60))
+            if missed_slots > 1:
+                num_videos = min(6, missed_slots)
+                logger.info(f"🚀 Catch-up mode: {missed_slots} slots missed since last run ({last_run.strftime('%H:%M')}). Generating {num_videos} videos.")
+
+        total_success = 0
+        for i in range(num_videos):
+            if num_videos > 1:
+                logger.info(f"📢 Generating catch-up video {i+1}/{num_videos}...")
+            
+            if video_mode == 'meme':
+                success = generate_meme_and_upload(
+                    channel_name=args.channel,
+                    channel_manager=channel_manager,
+                    topic=args.topic,
+                    dry_run=args.dry_run
+                )
+            else:
+                success = generate_and_upload(
+                    channel_name=args.channel,
+                    channel_manager=channel_manager,
+                    topic=args.topic,
+                    dry_run=args.dry_run
+                )
+            
+            if success:
+                total_success += 1
+            
+            # Small delay between batch uploads to stabilize YouTube ingestion
+            if num_videos > 1 and i < num_videos - 1:
+                import time
+                time.sleep(10)
+        
+        sys.exit(0 if total_success > 0 else 1)
     
     # Run scheduler
     if args.mode == 'scheduler':
