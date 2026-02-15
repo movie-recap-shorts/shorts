@@ -41,7 +41,12 @@ class InstagramUploader:
         self.credentials_dir = Path(credentials_dir)
         self.channel_name = channel_name
         self.session_file = self.credentials_dir / f"{channel_name}_ig_session.json"
+        
+        # Support both 'creds' and 'cred' naming variants
         self.creds_file = self.credentials_dir / f"{channel_name}_ig_creds.json"
+        if not self.creds_file.exists():
+            self.creds_file = self.credentials_dir / f"{channel_name}_ig_cred.json"
+            
         self.cl = Client()
         
     def authenticate(self) -> bool:

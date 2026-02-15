@@ -83,8 +83,8 @@
             "description_template": "💪 {script_summary}\n\n🔥 Shift your mindset today and join the top 1%.\n\n👇 Subscribe for daily stoic wisdom and billionaire tips!\n\n📚 Recommended Stoic Books (Affiliate): https://amzn.to/example-stoic\n\n#Shorts #Stoicism #Motivation #Success #Mindset #SelfImprovement #Wisdom #Hustle #BillionaireMindset",
             "min_upload_interval_minutes": 10,
             "daily_video_limit": 100,
-            "enable_tiktok": false,
-            "enable_instagram": false
+            "enable_tiktok": true,
+            "enable_instagram": true
         }
     ]
 }
