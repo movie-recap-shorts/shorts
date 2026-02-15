@@ -141,6 +141,27 @@ class TopicCache:
                 if len(result) >= limit:
                     break
         return result
+        
+    def get_last_usage_time(self, channel: str) -> Optional[datetime]:
+        """
+        Get the timestamp of the most recent topic usage for a channel.
+        
+        Args:
+            channel: Channel name
+            
+        Returns:
+            Datetime object of last usage, or None if never used
+        """
+        channel_entries = [
+            entry for entry in self.history
+            if entry['channel'] == channel
+        ]
+        if not channel_entries:
+            return None
+            
+        # Sort by timestamp descending
+        channel_entries.sort(key=lambda x: x['timestamp'], reverse=True)
+        return datetime.fromisoformat(channel_entries[0]['timestamp'])
     
     def get_unused_topic(self, channel: str, available_topics: List[str]) -> Optional[str]:
         """
@@ -244,3 +265,7 @@ if __name__ == "__main__":
     # Get recent topics
     recent = cache.get_recent_topics("test_channel", limit=5)
     print(f"Recent topics: {recent}")
+    
+    # Get last usage time
+    last_time = cache.get_last_usage_time("test_channel")
+    print(f"Last usage time for test_channel: {last_time}")
