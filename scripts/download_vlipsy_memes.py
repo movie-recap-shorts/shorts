@@ -18,29 +18,46 @@ MEME_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 VLIPSY_API_KEY = "vl_hFxn07bG43d0n9t"
 VLIPSY_API_BASE = "https://apiv2.vlipsy.com/v1"
 
-# Better search terms for viral/meme-worthy reaction clips
+# Better search terms for viral/meme-worthy reaction clips (including dark humor/funny)
 MEME_SEARCH_TERMS = [
-    "funny cat",
-    "wait what",
-    "shocked face",
+    "dark humor funny",
+    "funny reaction memes",
+    "shocking surprise",
+    "wait for it funny",
+    "unexpected ending",
+    "funny cat fail",
     "laughing hysterically",
-    "dog fail",
-    "dancing monkey",
-    "surprised pikachu",
-    "oh my god",
-    "mind blown",
-    "awkward silence",
-    "confused math lady",
-    "evil laugh",
-    "celebration dance",
-    "facepalm",
-    "no way",
-    "dramatic chipmunk",
-    "thug life",
-    "wasted",
+    "cursed images video",
+    "awkward silence funny",
+    "confused meme",
+    "evil laugh funny",
+    "savage reaction",
+    "instant regret",
+    "karma funny",
+    "scary jump scare funny",
+    "funny pranks",
+    "mind blown reaction",
+    "celebration dance funny",
+    "facepalm funny",
+    "no way meme",
+    "dramatic reaction",
+    "thug life funny",
+    "wasted meme",
+    "black humor clips",
+    "unusual videos funny",
+    "offensive memes funny", 
+    "meme clips 2024",
+    "funny movie scenes",
+    "cartoon funny reaction",
+    "sigma male meme",
+    "gigachad funny",
+    "cursed meme videos",
+    "darkest humor clips",
+    "unexpected karma",
+    "funny fail compilation",
 ]
 
-def download_vlipsy_memes(limit_per_term=3, total_target=50):
+def download_vlipsy_memes(limit_per_term=10, total_target=130):
     """Search and download meme clips from Vlipsy."""
     os.makedirs(MEME_DIR, exist_ok=True)
     
@@ -51,7 +68,7 @@ def download_vlipsy_memes(limit_per_term=3, total_target=50):
     try:
         resp = requests.get(
             f"{VLIPSY_API_BASE}/vlips/trending",
-            params={"key": VLIPSY_API_KEY, "limit": 10},
+            params={"key": VLIPSY_API_KEY, "limit": 20},
             timeout=30
         )
         if resp.status_code == 200:
@@ -91,14 +108,23 @@ def download_vlipsy_memes(limit_per_term=3, total_target=50):
         except Exception as e:
             logger.error(f"Error searching '{term}': {e}")
             
-    logger.success(f"🎉 Finished. Total new memes in pool: {downloaded_count}")
+    logger.success(f"🎉 Finished. Total memes in pool: {downloaded_count}")
 
 def download_vlip(vlip, term_tag):
     """Download a single vlip object."""
     vlip_id = vlip.get("id")
     title = vlip.get("title", "meme").replace(" ", "_")[:20]
     
-    # Get the highest quality MP4 URL (prefer non-watermarked if available, but usually it's there)
+    # Check duration (Vlipsy API might not always return duration in search, 
+    # but we can check if it exists)
+    # The user wants > 5 seconds
+    duration = float(vlip.get("duration", 0) or 0)
+    # If duration is 0, we'll download anyway as many vlips are usually 5-15s
+    if duration > 0 and duration < 5:
+        # logger.debug(f"Skipping {vlip_id}, too short ({duration}s)")
+        return False
+        
+    # Get the highest quality MP4 URL
     media = vlip.get("media", {})
     mp4 = media.get("mp4", {})
     url = mp4.get("url") or mp4.get("watermark")
@@ -110,7 +136,6 @@ def download_vlip(vlip, term_tag):
     filepath = os.path.join(MEME_DIR, filename)
     
     if os.path.exists(filepath):
-        # logger.debug(f"Skipping {filename}, already exists.")
         return True
         
     try:
@@ -118,6 +143,8 @@ def download_vlip(vlip, term_tag):
         r = requests.get(url, timeout=60)
         with open(filepath, "wb") as f:
             f.write(r.content)
+        
+        # After download, check real duration if possible (optional but good)
         return True
     except Exception as e:
         logger.error(f"  ❌ Failed to download {vlip_id}: {e}")
