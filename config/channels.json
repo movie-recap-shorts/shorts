@@ -42,6 +42,7 @@
             "daily_video_limit": 10,
             "enable_tiktok": false,
             "enable_instagram": false,
+            "affiliate_id": "shorts079-20",
             "affiliate_links": {
                 "movie,film,cinema,mistake,secret": "https://amzn.to/4o8YSzC",
                 "equipment,camera,setup,gear": "https://amzn.to/43CKC36",
@@ -91,6 +92,7 @@
             "daily_video_limit": 10,
             "enable_tiktok": true,
             "enable_instagram": true,
+            "affiliate_id": "shorts079-20",
             "affiliate_links": {
                 "marcus,aurelius,meditations,philosophy": "https://amzn.to/3iRQJg7",
                 "ryan,holiday,daily,wisdom": "https://amzn.to/3na59Yv",

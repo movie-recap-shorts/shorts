@@ -52,6 +52,7 @@ class ChannelConfig:
     
     # Affiliate Marketing
     affiliate_links: Dict[str, str] = field(default_factory=dict)
+    affiliate_id: str = ""
     
     def __post_init__(self):
         if not self.description_template:
@@ -138,6 +139,7 @@ class ChannelManager:
                     'enable_tiktok': ch.enable_tiktok,
                     'enable_instagram': ch.enable_instagram,
                     'affiliate_links': ch.affiliate_links,
+                    'affiliate_id': ch.affiliate_id,
                 }
                 for ch in self.channels.values()
             ]
@@ -271,6 +273,18 @@ class ChannelManager:
             logger.error(f"Error checking schedule for {channel_name}: {e}")
             return True # Fallback to true on error to avoid blocking valid runs
 
+    def _tag_link(self, link: str, affiliate_id: str) -> str:
+        """Helper to append affiliate tag to Amazon links."""
+        if not link or not affiliate_id:
+            return link
+            
+        if "amazon.com" in link or "amzn.to" in link:
+            if "tag=" not in link:
+                separator = "&" if "?" in link else "?"
+                if "amazon.com" in link:
+                    return f"{link}{separator}tag={affiliate_id}"
+        return link
+
     def get_affiliate_link(self, channel_name: str, script_text: str) -> str:
         """
         Get a relevant affiliate link based on keywords in the script.
@@ -296,10 +310,11 @@ class ChannelManager:
             # Split comma-separated keywords
             keyword_list = [k.strip() for k in keywords.split(',')]
             if any(k in script_lower for k in keyword_list):
-                return link
+                return self._tag_link(link, channel.affiliate_id)
                 
         # Fallback to default
-        return channel.affiliate_links.get("default", "")
+        link = channel.affiliate_links.get("default", "")
+        return self._tag_link(link, channel.affiliate_id)
 
     def get_missed_slots(self, channel_name: str, last_upload_time: datetime) -> int:
         """
