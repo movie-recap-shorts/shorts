@@ -145,9 +145,9 @@ def generate_meme_and_upload(
         # Get relevant affiliate link
         affiliate_link = channel_manager.get_affiliate_link(channel_name, hook_text)
         
-        description = channel.description_template.format(
-            script_summary=hook_text
-        ).replace("{{relevant_affiliate_link}}", affiliate_link)
+        # Use safe replacement for description template
+        raw_description = channel.description_template.replace("{script_summary}", hook_text)
+        description = raw_description.replace("{{relevant_affiliate_link}}", affiliate_link)
         
         # Get uploader and authenticate
         uploader = channel_manager.get_uploader(channel_name)
@@ -347,9 +347,9 @@ def generate_and_upload(
         # Get relevant affiliate link
         affiliate_link = channel_manager.get_affiliate_link(channel_name, script_text)
         
-        description = channel.description_template.format(
-            script_summary=script_summary
-        ).replace("{{relevant_affiliate_link}}", affiliate_link)
+        # Use safe replacement for description template
+        raw_description = channel.description_template.replace("{script_summary}", script_summary)
+        description = raw_description.replace("{{relevant_affiliate_link}}", affiliate_link)
         
         # Get uploader and authenticate
         uploader = channel_manager.get_uploader(channel_name)

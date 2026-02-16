@@ -21,6 +21,9 @@ try:
 except ImportError:
     APSCHEDULER_AVAILABLE = False
     logger.warning("APScheduler not installed. Run: pip install APScheduler")
+    
+from app.services.topic_cache import get_topic_cache
+
 
 
 class ShortsScheduler:

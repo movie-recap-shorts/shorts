@@ -416,6 +416,22 @@ class ChannelManager:
         
         return True
     
+    def get_upload_jitter(self) -> int:
+        """Returns a random delay in seconds (0-120) to make uploads look natural."""
+        return random.randint(0, 120)
+
+    def get_randomized_tags(self, channel_name: str) -> List[str]:
+        """Returns a shuffled subset of tags to vary metadata."""
+        channel = self.channels.get(channel_name)
+        if not channel or not channel.tags:
+            return []
+        
+        # Shuffle and take a random subset (min 5, max all)
+        tags = channel.tags.copy()
+        random.shuffle(tags)
+        count = random.randint(min(5, len(tags)), len(tags))
+        return tags[:count]
+
     def record_upload(self, channel_name: str):
         """Record an upload timestamp for rate limiting."""
         if channel_name not in self.upload_history:
@@ -448,7 +464,14 @@ class ChannelManager:
         if not topic:
             logger.error(f"No topics configured for channel: {channel_name}")
             return None
-        
+            
+        # Record topic usage
+        try:
+            cache = get_topic_cache()
+            cache.record_usage(channel_name, topic)
+        except Exception as e:
+            logger.warning(f"Failed to record topic usage: {e}")
+            
         return {
             'video_subject': topic,
             'video_language': channel.language,
@@ -458,6 +481,25 @@ class ChannelManager:
             'paragraph_number': channel.paragraph_number,
             'subtitle_enabled': channel.subtitle_enabled,
         }
+
+    def get_random_topic(self, channel_name: str) -> Optional[str]:
+        """
+        Get a smart topic for the channel using the cache.
+        Prefers unused topics, then least recently used.
+        """
+        channel = self.channels.get(channel_name)
+        if not channel or not channel.topics:
+            return None
+            
+        try:
+            cache = get_topic_cache()
+            topic = cache.get_smart_topic(channel_name, channel.topics)
+            logger.info(f"Selected topic for {channel_name}: {topic}")
+            return topic
+        except Exception as e:
+            logger.error(f"Error getting smart topic: {e}")
+            # Fallback to random
+            return random.choice(channel.topics)
     
     def authenticate_channel(self, channel_name: str, interactive: bool = True) -> bool:
         """
