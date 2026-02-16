@@ -1,18 +1,17 @@
-name: Movies Shorts Automation
+name: Master Shorts Automation
 
 on:
   schedule:
-    # Using off-peak minutes to avoid GitHub Actions scheduling delays
-    - cron: '13,28,43,58 * * * *'
-  workflow_dispatch:  # Allows manual run from GitHub interface
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 concurrency:
-  group: movies-shorts-${{ github.ref }}
+  group: shorts-automation-${{ github.repository }}
   cancel-in-progress: false
 
 jobs:
-  movies-channel:
-    if: github.repository == 'movie-recap-shorts/shorts'
+  process-shorts:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35,7 +34,8 @@ jobs:
       run: |
         pip install -r requirements.txt
 
-    - name: Setup Environment
+    - name: Detect Channel & Setup Environment
+      id: setup
       env:
         PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
@@ -44,18 +44,21 @@ jobs:
         DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
         SHEET_ID: ${{ secrets.SHEET_ID }}
-        CHANNEL_NAME: movies_en
-      run: python scripts/github_env_setup.py
+      run: |
+        if [ "${{ github.repository }}" == "statsmeans-source/shorts" ]; then
+          echo "channel=motivation_en" >> $GITHUB_OUTPUT
+          export CHANNEL_NAME=motivation_en
+        elif [ "${{ github.repository }}" == "movie-recap-shorts/shorts" ]; then
+          echo "channel=movies_en" >> $GITHUB_OUTPUT
+          export CHANNEL_NAME=movies_en
+        else
+          echo "Error: Unknown repository ${{ github.repository }}"
+          exit 1
+        fi
+        python scripts/github_env_setup.py
 
-    - name: Run Movies Channel Automation
+    - name: Run Automation (with Catch-up)
       env:
         PYTHONUNBUFFERED: "1"
       run: |
-        python automation.py --once --channel movies_en --video-mode meme
-
-    - name: Upload Logs (on failure)
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: automation-logs
-        path: logs/
+        python automation.py --once --channel ${{ steps.setup.outputs.channel }} --video-mode meme --catchup

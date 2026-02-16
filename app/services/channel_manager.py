@@ -258,12 +258,12 @@ class ChannelManager:
             tz = pytz.timezone(self.timezone)
             now = datetime.now(tz)
             
-            # Standard approach: check if trigger fires within [now - 14m, now + 14m]
-            # This allows the 15-minute cycle of GitHub Actions to catch the slot
-            start_window = now - timedelta(minutes=14)
+            # Standard approach: check if trigger fires within [now - 25m, now + 15m]
+            # This allows the 15-minute cycle of GitHub Actions to catch the slot more reliably
+            start_window = now - timedelta(minutes=25)
             next_fire = trigger.get_next_fire_time(None, start_window)
             
-            if next_fire and next_fire <= (now + timedelta(minutes=14)):
+            if next_fire and next_fire <= (now + timedelta(minutes=15)):
                 return True
                 
             return False
@@ -301,6 +301,48 @@ class ChannelManager:
         # Fallback to default
         return channel.affiliate_links.get("default", "")
 
+    def get_missed_slots(self, channel_name: str, last_upload_time: datetime) -> int:
+        """
+        Calculates how many scheduled slots have passed between last_upload_time and now.
+        Returns the number of unfulfilled slots.
+        """
+        channel = self.get_channel(channel_name)
+        if not channel or not channel.schedule:
+            return 0
+            
+        try:
+            from apscheduler.triggers.cron import CronTrigger
+            from datetime import timedelta
+            import pytz
+            
+            trigger = CronTrigger.from_crontab(channel.schedule, timezone=self.timezone)
+            tz = pytz.timezone(self.timezone)
+            
+            # Ensure last_upload_time has timezone info
+            if last_upload_time.tzinfo is None:
+                last_upload_time = tz.localize(last_upload_time)
+            else:
+                last_upload_time = last_upload_time.astimezone(tz)
+            
+            now = datetime.now(tz)
+            
+            missed_count = 0
+            current_search = last_upload_time
+            
+            # Find all scheduled times between last_run and now
+            # We add a small buffer (1 minute) to avoid double-counting the current slot
+            while True:
+                next_fire = trigger.get_next_fire_time(None, current_search + timedelta(seconds=60))
+                if not next_fire or next_fire > now:
+                    break
+                missed_count += 1
+                current_search = next_fire
+                
+            return missed_count
+        except Exception as e:
+            logger.error(f"Error calculating missed slots for {channel_name}: {e}")
+            return 0
+
     def can_upload(self, channel_name: str, ignore_interval: bool = False, ignore_schedule: bool = False) -> bool:
         """
         Check if channel can upload based on rate limits and schedule.
@@ -318,9 +360,20 @@ class ChannelManager:
             return False
             
         # 1. Check Schedule (if not ignored)
-        if not ignore_schedule and not self.check_schedule(channel_name):
-            logger.info(f"Channel {channel_name} is not on schedule, skipping.")
-            return False
+        if not ignore_schedule:
+            # Check if currently on schedule
+            on_schedule = self.check_schedule(channel_name)
+            
+            # PLUS: Check if we missed any slots since last upload
+            last_upload = self.get_last_upload_time(channel_name)
+            missed_slots = self.get_missed_slots(channel_name, last_upload) if last_upload else 1
+            
+            if not on_schedule and missed_slots == 0:
+                logger.debug(f"Channel {channel_name} is not on schedule and has no missed slots.")
+                return False
+            
+            if missed_slots > 0:
+                logger.info(f"Channel {channel_name} has {missed_slots} missed slots. Allowing upload.")
         
         history = self.upload_history.get(channel_name, [])
         now = datetime.now()
@@ -353,6 +406,11 @@ class ChannelManager:
         if channel_name not in self.upload_history:
             self.upload_history[channel_name] = []
         self.upload_history[channel_name].append(datetime.now())
+    
+    def get_last_upload_time(self, channel_name: str) -> Optional[datetime]:
+        """Get the last upload timestamp for a channel."""
+        history = self.upload_history.get(channel_name, [])
+        return max(history) if history else None
     
     def get_video_params(self, channel_name: str, topic: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
