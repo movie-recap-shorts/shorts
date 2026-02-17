@@ -187,7 +187,8 @@ def generate_meme_and_upload(
                     ig_result = upload_video_to_instagram(
                         video_path=video_path,
                         caption=f"{title}\n\n{description}",
-                        channel_name=channel_name
+                        channel_name=channel_name,
+                        credentials_dir=str(CREDENTIALS_DIR)
                     )
                     if ig_result:
                         logger.success(f"Instagram Reels upload successful! URL: {ig_result.get('url')}")
@@ -200,7 +201,8 @@ def generate_meme_and_upload(
                     tt_result = upload_to_tiktok(
                         video_path=video_path,
                         description=title,
-                        channel_name=channel_name
+                        channel_name=channel_name,
+                        credentials_dir=str(CREDENTIALS_DIR)
                     )
                     if tt_result:
                         logger.success("TikTok upload successful!")
