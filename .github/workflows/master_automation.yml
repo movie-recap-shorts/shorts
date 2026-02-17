@@ -33,6 +33,8 @@ jobs:
     - name: Install Python dependencies
       run: |
         pip install -r requirements.txt
+        pip install playwright
+        playwright install chromium
 
     - name: Detect Channel & Setup Environment
       id: setup

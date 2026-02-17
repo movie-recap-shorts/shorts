@@ -193,7 +193,8 @@ def generate_meme_and_upload(
                     if ig_result:
                         logger.success(f"Instagram Reels upload successful! URL: {ig_result.get('url')}")
                 except Exception as e:
-                    logger.error(f"Instagram upload failed: {e}")
+                    logger.warning(f"Instagram upload failed (Soft Fail): {e}")
+                    logger.info("Continuing execution despite Instagram error...")
                     
             if channel_config.enable_tiktok:
                 logger.info(f"Uploading to TikTok for {channel_name}...")

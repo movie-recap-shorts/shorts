@@ -1226,7 +1226,30 @@ def azure_tts_v1(
                             sub_maker.feed(chunk)
                 return sub_maker
 
-            sub_maker = asyncio.run(_do())
+            # Check for existing event loop
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+
+            if loop and loop.is_running():
+                # We are already in an event loop, await the coroutine directly
+                # Note: This function (azure_tts_v1) is synchronous, so we can't await here.
+                # However, azure_tts_v1 is usually called from a sync context. 
+                # If it IS called from async, we should use create_task, but here we need the result.
+                # Since edge-tts is async, we really should be calling this asynchronously.
+                # BUT, to fix the immediate crash without refactoring the whole app:
+                # We use a nested runner or run_coroutine_threadsafe if we were in a thread.
+                # For now, let's try to use the existing loop if possible, or fall back.
+                # Actually, the error `asyncio.run() cannot be called from a running event loop` 
+                # happens because `upload_tiktok` might have started a loop or similar.
+                
+                # Correct fix for sync-called-from-async-context-or-nested-loop:
+                import nest_asyncio
+                nest_asyncio.apply()
+                sub_maker = asyncio.run(_do())
+            else:
+                sub_maker = asyncio.run(_do())
             
             # edge-tts 7.x may not return WordBoundary events
             # Check if audio file was created successfully
