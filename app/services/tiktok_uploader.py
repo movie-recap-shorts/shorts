@@ -59,17 +59,56 @@ class TikTokUploader:
             logger.info(f"Uploading video to TikTok: {video_path}")
             # tiktok-uploader usually takes the filename as part of the process
             # and uses playwright in the background
-            upload_video(
-                filename=video_path,
-                description=description,
-                cookies=str(self.cookies_file)
-            )
-            logger.success("TikTok upload command executed.")
-            return True
+            # Run in a separate process to avoid "Playwright Sync API inside the asyncio loop" error
+            from multiprocessing import Process, Queue
+            
+            q = Queue()
+            p = Process(target=_run_upload, args=(q, video_path, description, str(self.cookies_file)))
+            p.start()
+            p.join()
+            
+            result = q.get()
+            if result is True:
+                logger.success("TikTok upload command executed.")
+                return True
+            else:
+                logger.error(f"TikTok upload process failed: {result}")
+                return False
             
         except Exception as e:
             logger.error(f"TikTok upload failed: {e}")
             return False
+
+
+def _run_upload(queue, video_path, description, cookies_file_path):
+    """Helper function to run upload in a separate process."""
+    try:
+        import json
+        from tiktok_uploader.upload import upload_video as _upload
+        
+        # Load and normalize cookies
+        with open(cookies_file_path, 'r') as f:
+            cookies_data = json.load(f)
+            
+        normalized_cookies = []
+        for cookie in cookies_data:
+            # Map common browser export fields to what tiktok-uploader expects
+            new_cookie = cookie.copy()
+            if 'expirationDate' in cookie:
+                expiry = int(cookie['expirationDate'])
+                new_cookie['expiry'] = expiry
+                new_cookie['expires'] = expiry
+            normalized_cookies.append(new_cookie)
+            
+        _upload(
+            filename=video_path,
+            description=description,
+            cookies_list=normalized_cookies,
+            headless=True
+        )
+        queue.put(True)
+    except Exception as e:
+        queue.put(e)
 
 
 def upload_to_tiktok(
