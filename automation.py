@@ -626,7 +626,8 @@ def main():
             # We cap it at the specified limit (default 1) or a reasonable max
             missed_slots = int(elapsed_seconds // (15 * 60))
             if missed_slots > 1:
-                num_videos = min(args.limit if args.limit > 1 else 6, missed_slots)
+                # Limit catch-up to maximum 2 videos per run (1 current + 1 catch-up) to avoid spam
+                num_videos = min(args.limit if args.limit > 1 else 2, missed_slots)
                 logger.info(f"🚀 Catch-up mode: {missed_slots} slots missed since last run ({last_run.strftime('%H:%M')}). Generating {num_videos} videos.")
 
         total_success = 0

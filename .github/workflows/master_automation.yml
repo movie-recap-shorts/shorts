@@ -57,6 +57,21 @@ jobs:
         fi
         python scripts/github_env_setup.py
 
+    - name: Create Credential Files
+      env:
+        IG_CRED_JSON: ${{ secrets.IG_CRED_JSON }}
+        TIKTOK_COOKIES_TXT: ${{ secrets.TIKTOK_COOKIES_TXT }}
+      run: |
+        mkdir -p credentials
+        if [ -n "$IG_CRED_JSON" ]; then
+          echo "$IG_CRED_JSON" > credentials/motivation_en_ig_cred.json
+          echo "Created Instagram credentials file"
+        fi
+        if [ -n "$TIKTOK_COOKIES_TXT" ]; then
+          echo "$TIKTOK_COOKIES_TXT" > credentials/motivation_en_tiktok_cookies.txt
+          echo "Created TikTok cookies file"
+        fi
+
     - name: Run Automation (with Catch-up)
       env:
         PYTHONUNBUFFERED: "1"
