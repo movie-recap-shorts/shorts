@@ -204,17 +204,6 @@ def _run_tiktok_upload(queue, video_path, description, cookies_file_path, headle
                 dismiss_modal()
                 time.sleep(2)
                 
-                # 2. Description — use JS focus to bypass any remaining overlays
-                logger.info("TikTok: Filling description...")
-                page.evaluate("""(desc) => {
-                    const editor = document.querySelector('div[contenteditable="true"]');
-                    if (editor) {
-                        editor.focus();
-                        editor.textContent = '';
-                        document.execCommand('insertText', false, desc);
-                    }
-                }""", description)
-
                 
                 # 3. Wait for video to finish processing (Post button becomes enabled)
                 logger.info("TikTok: Waiting for video processing to complete...")
@@ -233,6 +222,26 @@ def _run_tiktok_upload(queue, video_path, description, cookies_file_path, headle
                         break
                     time.sleep(5)
                 
+                # 4. Fill description NOW (after processing) — TikTok auto-fills with filename during upload
+                logger.info("TikTok: Filling description (post-processing)...")
+                for fill_attempt in range(3):
+                    filled = page.evaluate("""(desc) => {
+                        // Find the caption/description editor
+                        const editors = document.querySelectorAll('div[contenteditable="true"]');
+                        if (!editors.length) return false;
+                        const editor = editors[0];
+                        editor.focus();
+                        // Select all existing text and delete it
+                        document.execCommand('selectAll', false, null);
+                        document.execCommand('delete', false, null);
+                        // Insert our description
+                        document.execCommand('insertText', false, desc);
+                        return editor.textContent.trim().length > 0;
+                    }""", description)
+                    logger.info(f"TikTok: Description fill attempt {fill_attempt+1}: {'OK' if filled else 'failed'}")
+                    if filled:
+                        break
+                    time.sleep(2)
 
                 # Post the video — handle TikTok's "automatic content checks" modal
                 logger.info("TikTok: Starting post sequence...")
