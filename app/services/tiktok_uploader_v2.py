@@ -216,47 +216,35 @@ def _run_tiktok_upload(queue, video_path, description, cookies_file_path, headle
                 }""", description)
 
                 
-                # 3. Wait for video to process, then post
-                logger.info("TikTok: Waiting for video processing...")
-                time.sleep(10)
+                # 3. Wait for video to finish processing (Post button becomes enabled)
+                logger.info("TikTok: Waiting for video processing to complete...")
+                for wait_attempt in range(12):  # up to 60s
+                    btn_state = page.evaluate("""() => {
+                        const buttons = document.querySelectorAll('button');
+                        for (const btn of buttons) {
+                            if (btn.textContent.trim() === 'Post') {
+                                return btn.disabled ? 'disabled' : 'enabled';
+                            }
+                        }
+                        return 'not_found';
+                    }""")
+                    logger.info(f"TikTok: Post button state: {btn_state}")
+                    if btn_state == 'enabled':
+                        break
+                    time.sleep(5)
                 
+
                 # Post the video — handle TikTok's "automatic content checks" modal
                 logger.info("TikTok: Starting post sequence...")
                 
                 posted = False
                 for attempt in range(15):
-                    # Step 1: Check if already posted successfully
-                    try:
-                        current_url = page.url
-                        # TikTok navigates to /content or /manage after posting
-                        if '/upload' not in current_url:
-                            logger.info(f"TikTok: Upload success — navigated to: {current_url}")
-                            posted = True
-                            break
-                    except Exception:
-                        pass
-                    
-                    # Check for success text indicators
-                    try:
-                        success_check = page.evaluate("""() => {
-                            const body = document.body.textContent;
-                            if (body.includes('Video published')) return 'published';
-                            if (body.includes('Your videos are being uploaded')) return 'uploading';
-                            if (body.includes('Manage your posts')) return 'manage';
-                            if (body.includes('Posts')) return 'posts_page';
-                            return null;
-                        }""")
-                        if success_check:
-                            logger.info(f"TikTok: Upload success detected: {success_check}!")
-                            posted = True
-                            break
-                    except Exception:
-                        pass
-                    
-                    # Step 2: Dismiss any modals, then try clicking Post
+                    # Step 1: Dismiss any blocking modals first
                     dismiss_modal()
+                    time.sleep(1)
                     
-                    result = page.evaluate("""() => {
+                    # Step 2: Try to click the Post button
+                    click_result = page.evaluate("""() => {
                         const portal = document.querySelector('[data-floating-ui-portal]');
                         if (portal) return 'modal_still_present';
                         
@@ -280,14 +268,15 @@ def _run_tiktok_upload(queue, video_path, description, cookies_file_path, headle
                             }
                         }
                         
-                        return 'nothing_found|url:' + window.location.href;
+                        return 'post_button_not_found|url:' + window.location.href;
                     }""")
                     
-                    logger.info(f"TikTok: JS action result (attempt {attempt+1}): {result}")
+                    logger.info(f"TikTok: Post click result (attempt {attempt+1}): {click_result}")
                     
-                    if result == 'clicked_post':
-                        # Post was clicked — wait for page navigation
-                        time.sleep(10)
+                    if click_result == 'clicked_post':
+                        # Post was clicked — wait for page navigation (real success = URL changes)
+                        logger.info("TikTok: Post clicked, waiting for navigation...")
+                        time.sleep(12)
                         try:
                             current_url = page.url
                             logger.info(f"TikTok: URL after post click: {current_url}")
@@ -295,11 +284,27 @@ def _run_tiktok_upload(queue, video_path, description, cookies_file_path, headle
                                 logger.info("TikTok: Upload success confirmed — left upload page!")
                                 posted = True
                                 break
+                            # Also check for 'Video published' text (strict check)
+                            published = page.evaluate("""() => {
+                                const body = document.body.textContent;
+                                if (body.includes('Video published')) return true;
+                                if (body.includes('Your videos are being uploaded')) return true;
+                                return false;
+                            }""")
+                            if published:
+                                logger.info("TikTok: 'Video published' text detected!")
+                                posted = True
+                                break
                         except Exception:
                             pass
+                    elif click_result == 'modal_still_present':
+                        logger.info("TikTok: Modal still present, retrying dismiss...")
+                    else:
+                        logger.info(f"TikTok: Post button not found yet, waiting...")
                     
                     time.sleep(5)
                 
+
                 if posted:
                     browser.close()
 
