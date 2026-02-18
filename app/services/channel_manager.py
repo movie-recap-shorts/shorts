@@ -14,6 +14,7 @@ from datetime import datetime
 
 from loguru import logger
 
+from app.services import llm
 from app.services.youtube_uploader import YouTubeUploader
 from app.services.script_cache import get_topic_cache
 from app.services.scheduler import ShortsScheduler
@@ -217,25 +218,37 @@ class ChannelManager:
     def get_random_topic(self, channel_name: str) -> Optional[str]:
         """
         Get a smart topic for video generation.
-        Uses topic history cache to avoid repetition - prefers unused topics,
-        falls back to least-used ones.
         
-        Args:
-            channel_name: Name of the channel
-            
-        Returns:
-            Selected topic string or None
+        Strategy:
+        1. 80% chance: Use LLM to generate a FRESH, UNIQUE topic based on channel seeds.
+        2. 20% chance (or LLM failure): Fall back to cache.get_smart_topic() (least used seed).
         """
         channel = self.channels.get(channel_name)
         if not channel or not channel.topics:
             return None
         
-        # Use smart topic selection from cache
-        cache = get_topic_cache()
-        selected_topic = cache.get_smart_topic(channel_name, channel.topics)
+        selected_topic = None
         
-        # Record the usage
-        cache.record_usage(channel_name, selected_topic)
+        # Try dynamic generation (80% probability)
+        if random.random() < 0.8:
+            try:
+                logger.info(f"✨ Generating fresh topic ideas for {channel_name}...")
+                new_ideas = llm.generate_topic_ideas(channel_name, channel.topics, count=1)
+                if new_ideas:
+                    selected_topic = new_ideas[0]
+                    logger.info(f"🎯 Dynamic topic selected: {selected_topic}")
+            except Exception as e:
+                logger.warning(f"Dynamic topic generation failed: {e}")
+        
+        # Fallback to fixed list (Smart Cache)
+        if not selected_topic:
+            cache = get_topic_cache()
+            selected_topic = cache.get_smart_topic(channel_name, channel.topics)
+            logger.info(f"♻️  Using cached topic: {selected_topic}")
+        
+        # Record usage
+        if selected_topic:
+            get_topic_cache().record_usage(channel_name, selected_topic)
         
         return selected_topic
     
@@ -482,24 +495,7 @@ class ChannelManager:
             'subtitle_enabled': channel.subtitle_enabled,
         }
 
-    def get_random_topic(self, channel_name: str) -> Optional[str]:
-        """
-        Get a smart topic for the channel using the cache.
-        Prefers unused topics, then least recently used.
-        """
-        channel = self.channels.get(channel_name)
-        if not channel or not channel.topics:
-            return None
-            
-        try:
-            cache = get_topic_cache()
-            topic = cache.get_smart_topic(channel_name, channel.topics)
-            logger.info(f"Selected topic for {channel_name}: {topic}")
-            return topic
-        except Exception as e:
-            logger.error(f"Error getting smart topic: {e}")
-            # Fallback to random
-            return random.choice(channel.topics)
+
     
     def authenticate_channel(self, channel_name: str, interactive: bool = True) -> bool:
         """

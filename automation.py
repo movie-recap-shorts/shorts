@@ -37,8 +37,8 @@ from app.services.scheduler import ShortsScheduler
 from app.services.youtube_uploader import YouTubeUploader
 from app.services import task as video_task, llm
 from app.services.meme_video import generate_meme_short
-from app.services.instagram_uploader import upload_video_to_instagram
-from app.services.tiktok_uploader import upload_to_tiktok
+from app.services.instagram_uploader_v2 import upload_to_instagram_browser
+from app.services.tiktok_uploader_v2 import upload_to_tiktok_browser
 from app.models.schema import VideoParams
 
 
@@ -182,33 +182,39 @@ def generate_meme_and_upload(
             channel_config = channel_manager.get_channel(channel_name)
             
             if channel_config.enable_instagram:
-                logger.info(f"Uploading to Instagram Reels for {channel_name}...")
+                # Method 3: Browser-based upload (Resilient to IP blocks)
+                from app.services.instagram_uploader_v2 import upload_to_instagram_browser
+                logger.info(f"Uploading to Instagram Reels (Browser Mode) for {channel_name}...")
+                
                 try:
-                    ig_result = upload_video_to_instagram(
+                    ig_result = upload_to_instagram_browser(
                         video_path=video_path,
                         caption=f"{title}\n\n{description}",
                         channel_name=channel_name,
                         credentials_dir=str(CREDENTIALS_DIR)
                     )
                     if ig_result:
-                        logger.success(f"Instagram Reels upload successful! URL: {ig_result.get('url')}")
+                        logger.success(f"Instagram Reels upload successful via browser!")
                 except Exception as e:
-                    logger.warning(f"Instagram upload failed (Soft Fail): {e}")
+                    logger.warning(f"Instagram browser upload failed (Soft Fail): {e}")
                     logger.info("Continuing execution despite Instagram error...")
                     
             if channel_config.enable_tiktok:
-                logger.info(f"Uploading to TikTok for {channel_name}...")
+                # Method 3: Browser-based upload (handles modals and avoids asyncio loop issues)
+                from app.services.tiktok_uploader_v2 import upload_to_tiktok_browser
+                logger.info(f"Uploading to TikTok (Browser Mode) for {channel_name}...")
+                
                 try:
-                    tt_result = upload_to_tiktok(
+                    tt_result = upload_to_tiktok_browser(
                         video_path=video_path,
-                        description=title,
+                        description=title, # TikTok usually prefers shorter captions (titles)
                         channel_name=channel_name,
                         credentials_dir=str(CREDENTIALS_DIR)
                     )
                     if tt_result:
-                        logger.success("TikTok upload successful!")
+                        logger.success(f"TikTok upload successful via browser!")
                 except Exception as e:
-                    logger.error(f"TikTok upload failed: {e}")
+                    logger.warning(f"TikTok browser upload failed: {e}")
             
             return True
         else:
@@ -387,30 +393,33 @@ def generate_and_upload(
             channel_config = channel_manager.get_channel(channel_name)
             
             if channel_config.enable_instagram:
-                logger.info(f"Uploading to Instagram Reels for {channel_name}...")
+                logger.info(f"Uploading to Instagram Reels (Browser Mode) for {channel_name}...")
                 try:
-                    ig_result = upload_video_to_instagram(
+                    ig_result = upload_to_instagram_browser(
                         video_path=video_path,
                         caption=f"{title}\n\n{description}",
-                        channel_name=channel_name
+                        channel_name=channel_name,
+                        credentials_dir=str(CREDENTIALS_DIR)
                     )
                     if ig_result:
-                        logger.success(f"Instagram Reels upload successful! URL: {ig_result.get('url')}")
+                        logger.success(f"Instagram Reels upload successful via browser!")
                 except Exception as e:
-                    logger.error(f"Instagram upload failed: {e}")
+                    logger.warning(f"Instagram browser upload failed (Soft Fail): {e}")
+                    logger.info("Continuing execution despite Instagram error...")
                     
             if channel_config.enable_tiktok:
-                logger.info(f"Uploading to TikTok for {channel_name}...")
+                logger.info(f"Uploading to TikTok (Browser Mode) for {channel_name}...")
                 try:
-                    tt_result = upload_to_tiktok(
+                    tt_result = upload_to_tiktok_browser(
                         video_path=video_path,
                         description=title,
-                        channel_name=channel_name
+                        channel_name=channel_name,
+                        credentials_dir=str(CREDENTIALS_DIR)
                     )
                     if tt_result:
-                        logger.success("TikTok upload successful!")
+                        logger.success(f"TikTok upload successful via browser!")
                 except Exception as e:
-                    logger.error(f"TikTok upload failed: {e}")
+                    logger.warning(f"TikTok browser upload failed (Soft Fail): {e}")
             
             return True
         else:

@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import re
 import requests
 from typing import List
@@ -622,3 +623,50 @@ if __name__ == "__main__":
     print("######################")
     print(search_terms)
     
+
+def generate_topic_ideas(channel_name: str, base_topics: List[str], count: int = 5) -> List[str]:
+    """
+    Generate new viral topic ideas based on existing seed topics.
+    """
+    try:
+        # Select a random subset of base topics to inspire the new ones
+        seeds = random.sample(base_topics, min(3, len(base_topics)))
+        seed_str = ", ".join([f'"{s}"' for s in seeds])
+        
+        prompt = f"""
+        Act as a viral YouTube Shorts strategist for a '{channel_name}' channel.
+        
+        Here are some successful video topics we've used:
+        {seed_str}
+        
+        Generate {count} NEW, UNIQUE, and HIGHLY VIRAL topic ideas for this niche.
+        
+        Rules:
+        1. Topics must be punchy, intriguing, and suitable for a 30-60s Short.
+        2. Focus on "mind-blowing facts", "secrets", "life hacks", or "shocking truths".
+        3. Do NOT repeat the seed topics.
+        4. Return ONLY a JSON array of strings, e.g., ["topic 1", "topic 2"].
+        5. No other text or markdown.
+        """
+        
+        response = _generate_response(prompt)
+        
+        # Clean response to ensure valid JSON
+        response = response.strip()
+        if response.startswith("```json"):
+            response = response.replace("```json", "").replace("```", "")
+        elif response.startswith("```"):
+            response = response.replace("```", "")
+            
+        topics = json.loads(response)
+        
+        if isinstance(topics, list) and len(topics) > 0:
+            logger.success(f"Generated {len(topics)} new topics for {channel_name}")
+            return [str(t) for t in topics]
+            
+        logger.warning("LLM returned valid JSON but not a list of topics")
+        return []
+        
+    except Exception as e:
+        logger.error(f"Failed to generate topic ideas: {e}")
+        return []
