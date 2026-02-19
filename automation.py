@@ -561,6 +561,15 @@ def main():
     # Setup logging
     setup_logging()
     
+    # Anti-bot jitter: randomize startup time so uploads don't happen at precise intervals
+    # TikTok and YouTube flag accounts that upload at perfectly regular intervals (bot signal)
+    if not args.dry_run:
+        import time as _time
+        jitter_seconds = random.randint(0, 480)  # 0–8 minutes random delay
+        logger.info(f"⏱️  Anti-bot jitter: waiting {jitter_seconds}s before starting...")
+        _time.sleep(jitter_seconds)
+    
+
     # Create sample config if requested
     if args.create_sample_config:
         create_sample_config(args.config)
