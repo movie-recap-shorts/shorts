@@ -86,6 +86,7 @@ class ChannelManager:
         """
         self.config_file = Path(config_file)
         self.credentials_dir = Path(credentials_dir)
+        self.upload_log_file = self.config_file.parent / "upload_log.json"
         self.timezone = timezone
         self.channels: Dict[str, ChannelConfig] = {}
         self.uploaders: Dict[str, YouTubeUploader] = {}
@@ -93,6 +94,8 @@ class ChannelManager:
         
         # Load channel configurations
         self._load_config()
+        # Load persisted upload history from disk
+        self._load_upload_log()
     
     def _load_config(self):
         """Load channel configurations from file."""
@@ -113,6 +116,42 @@ class ChannelManager:
             
         except Exception as e:
             logger.error(f"Failed to load channel config: {e}")
+    
+    def _load_upload_log(self):
+        """Load persisted upload history from disk (survives across GitHub Actions runs)."""
+        if not self.upload_log_file.exists():
+            return
+        try:
+            with open(self.upload_log_file, 'r') as f:
+                raw = json.load(f)
+            for channel_name, timestamps in raw.items():
+                parsed = []
+                for ts in timestamps:
+                    try:
+                        parsed.append(datetime.fromisoformat(ts))
+                    except Exception:
+                        pass
+                self.upload_history[channel_name] = parsed
+            logger.info(f"Loaded upload log: {sum(len(v) for v in self.upload_history.values())} entries")
+        except Exception as e:
+            logger.warning(f"Could not load upload log: {e}")
+    
+    def _save_upload_log(self):
+        """Persist upload history to disk so rate limits survive across GitHub Actions runs."""
+        try:
+            # Only keep today + yesterday (prune old data)
+            from datetime import timedelta
+            cutoff = datetime.now() - timedelta(days=2)
+            pruned = {
+                ch: [t.isoformat() for t in times if t >= cutoff]
+                for ch, times in self.upload_history.items()
+            }
+            self.upload_log_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.upload_log_file, 'w') as f:
+                json.dump(pruned, f, indent=2)
+            logger.debug(f"Saved upload log to {self.upload_log_file}")
+        except Exception as e:
+            logger.warning(f"Could not save upload log: {e}")
     
     def save_config(self):
         """Save channel configurations to file."""
@@ -446,10 +485,12 @@ class ChannelManager:
         return tags[:count]
 
     def record_upload(self, channel_name: str):
-        """Record an upload timestamp for rate limiting."""
+        """Record an upload timestamp for rate limiting (persisted to disk)."""
         if channel_name not in self.upload_history:
             self.upload_history[channel_name] = []
         self.upload_history[channel_name].append(datetime.now())
+        # Persist immediately so the next GH Actions run sees this upload
+        self._save_upload_log()
     
     def get_last_upload_time(self, channel_name: str) -> Optional[datetime]:
         """Get the last upload timestamp for a channel."""

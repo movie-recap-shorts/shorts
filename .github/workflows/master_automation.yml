@@ -14,11 +14,13 @@ jobs:
   process-shorts:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # Required to commit upload_log.json and topic_history.json back to repo
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -79,3 +81,13 @@ jobs:
         PYTHONUNBUFFERED: "1"
       run: |
         python automation.py --once --channel ${{ steps.setup.outputs.channel }} --video-mode meme --catchup
+
+    - name: Save Rate Limit & Topic History
+      if: always()
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git pull --rebase origin main || true
+        git add config/upload_log.json config/topic_history.json 2>/dev/null || true
+        git diff --staged --quiet || git commit -m "chore: update upload log and topic history [skip ci]"
+        git push origin main || true
