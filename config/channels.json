@@ -15,7 +15,7 @@
                 "did you catch this mistake in Harry Potter",
                 "the hidden connection between pixar movies"
             ],
-            "schedule": "0 9,14,19 * * *",
+            "schedule": "0 9,14,19,23 * * *",
             "language": "en",
             "voice": "en-US-GuyNeural-Male",
             "video_aspect": "9:16",
@@ -39,9 +39,9 @@
             ],
             "description_template": "🎬 {script_summary}\n\n🍿 Did you catch this secret detail? Let us know in the comments!\n\n👇 Subscribe for daily hidden movie secrets!\n\n🔥 Recommended for Movie Fans: {{relevant_affiliate_link}}\n\n#Shorts #MovieSecrets #DidYouNotice #FilmTheory #Cinema #HiddenDetails #EasterEggs",
             "min_upload_interval_minutes": 240,
-            "daily_video_limit": 3,
-            "enable_tiktok": false,
-            "enable_instagram": false,
+            "daily_video_limit": 4,
+            "enable_tiktok": true,
+            "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
                 "movie,film,cinema,mistake,secret": "https://www.amazon.com/dp/B07MTCMHZX",
