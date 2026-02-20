@@ -100,13 +100,20 @@ def _run_upload(queue, video_path, description, cookies_file_path):
                 new_cookie['expires'] = expiry
             normalized_cookies.append(new_cookie)
             
-        _upload(
+        # The upload_video function returns a list of dictionaries for each video that FAILED to upload.
+        # If the list is empty, the upload was successful.
+        failed_videos = _upload(
             filename=video_path,
             description=description,
             cookies_list=normalized_cookies,
             headless=True
         )
-        queue.put(True)
+        
+        if not failed_videos:
+            queue.put(True)
+        else:
+            queue.put(f"Upload failed for following videos: {failed_videos}")
+            
     except Exception as e:
         queue.put(e)
 
