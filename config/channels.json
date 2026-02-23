@@ -44,7 +44,7 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "movie,film,cinema,story": "https://www.audible.com/ep/audible-affiliate-program?tag=YOUR_AMAZON_TAG",
+                "movie,film,cinema,story": "https://www.audible.com/ep/audible-affiliate-program?tag=shorts079-20",
                 "equipment,camera,setup": "https://www.amazon.com/dp/B07MTCMHZX",
                 "default": "https://www.skillshare.com/en/affiliates"
             }
@@ -93,9 +93,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "stoic,marcus,mindset,success": "https://www.audible.com/ep/audible-affiliate-program?tag=YOUR_AMAZON_TAG",
+                "stoic,marcus,mindset,success": "https://www.audible.com/ep/audible-affiliate-program?tag=shorts079-20",
                 "habit,growth,learn": "https://www.shortform.com/affiliate",
-                "default": "https://www.audible.com/ep/audible-affiliate-program?tag=YOUR_AMAZON_TAG"
+                "default": "https://www.audible.com/ep/audible-affiliate-program?tag=shorts079-20"
             }
         },
         {
