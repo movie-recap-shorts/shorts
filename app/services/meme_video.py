@@ -517,7 +517,8 @@ def generate_meme_short(
         
         # --- SEGMENT 3: Outro ---
         outro_audio = AudioFileClip(outro_audio_path)
-        outro_duration = outro_audio.duration + 0.5
+        # Cap outro duration to 1.5 seconds max to prevent swipe-aways (AVD killer)
+        outro_duration = min(1.5, outro_audio.duration + 0.5)
         
         outro_bg = ColorClip(
             size=(video_width, video_height),

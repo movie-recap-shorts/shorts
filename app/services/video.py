@@ -317,51 +317,41 @@ def wrap_text(text, max_width, font="Arial", fontsize=60):
 
     def get_text_size(inner_text):
         inner_text = inner_text.strip()
+        if not inner_text:
+            return 0, 0
         left, top, right, bottom = font.getbbox(inner_text)
         return right - left, bottom - top
 
-    width, height = get_text_size(text)
-    if width <= max_width:
-        return text, height
-
-    processed = True
-
-    _wrapped_lines_ = []
+    # TikTok Style: Force max 1-2 words per line regardless of width.
     words = text.split(" ")
-    _txt_ = ""
-    for word in words:
-        _before = _txt_
-        _txt_ += f"{word} "
-        _width, _height = get_text_size(_txt_)
-        if _width <= max_width:
-            continue
-        else:
-            if _txt_.strip() == word.strip():
-                processed = False
-                break
-            _wrapped_lines_.append(_before)
-            _txt_ = f"{word} "
-    _wrapped_lines_.append(_txt_)
-    if processed:
-        _wrapped_lines_ = [line.strip() for line in _wrapped_lines_]
-        result = "\n".join(_wrapped_lines_).strip()
-        height = len(_wrapped_lines_) * height
-        return result, height
-
     _wrapped_lines_ = []
-    chars = list(text)
-    _txt_ = ""
-    for word in chars:
-        _txt_ += word
-        _width, _height = get_text_size(_txt_)
-        if _width <= max_width:
-            continue
-        else:
-            _wrapped_lines_.append(_txt_)
+    
+    # Simple chunking: 2 words max per line
+    chunk_size = 2
+    for i in range(0, len(words), chunk_size):
+        chunk = " ".join(words[i:i+chunk_size])
+        
+        # If the chunk is still somehow wider than max_width, split it by characters
+        chunk_width, _ = get_text_size(chunk)
+        if chunk_width > max_width:
+            chars = list(chunk)
             _txt_ = ""
-    _wrapped_lines_.append(_txt_)
+            for char in chars:
+                _txt_ += char
+                _w, _h = get_text_size(_txt_)
+                if _w > max_width:
+                    _wrapped_lines_.append(_txt_[:-1])
+                    _txt_ = char
+            if _txt_:
+                _wrapped_lines_.append(_txt_)
+        else:
+            _wrapped_lines_.append(chunk)
+
     result = "\n".join(_wrapped_lines_).strip()
-    height = len(_wrapped_lines_) * height
+    
+    # Calculate total height
+    _, single_line_height = get_text_size("A")
+    height = len(_wrapped_lines_) * single_line_height
     return result, height
 
 

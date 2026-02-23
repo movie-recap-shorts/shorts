@@ -551,21 +551,21 @@ def generate_stoic_script(topic: str, language: str = "en") -> str:
     lang_name = "English" if language == "en" else "Turkish" if language == "tr" else language
     
     prompt = f"""
-# Role: Stoic Philosophy & Billionaire Mindset Coach
+# Role: Viral Shorts & Stoic Philosophy Expert
 ## Task: Generate a transformation script (30-40 words) for a YouTube Short.
 
 ## Topic: {topic}
 
-## Structure:
-1. Hook (The Struggle): A common modern obsession or pain point.
-2. The Wisdom: A quote or perspective from Stoicism (Marcus Aurelius, Seneca, Epictetus) or a Top 1% mindset.
-3. The Action: A direct call to shift the mindset.
+## Structure (CRITICAL):
+1. Hook (The Struggle): High-arousal pain point. MUST BE UNDER 8 WORDS AND TAKE LESS THAN 3 SECONDS TO SAY. (e.g., "Stop wasting your life on...", "99% of people fail because...")
+2. The Wisdom: A quote or perspective from Stoicism or Top 1% mindset.
+3. The Action & SEAMLESS LOOP: A direct call to shift the mindset. The LAST sentence MUST grammatically flow directly into the FIRST sentence (the Hook) so it loops perfectly when the video restarts.
 
 ## Constraints:
 - Language: {lang_name}
-- Tone: Deep, calm, authoritative.
+- Tone: Deep, calm, authoritative, fast-paced.
 - No markdown, no "Narrator:", no titles.
-- Max 3 sentences.
+- Total length: Max 3-4 sentences.
 
 Script:""".strip()
 
@@ -573,7 +573,7 @@ Script:""".strip()
         script = _generate_response(prompt).strip()
         if script and "Error:" not in script:
             return re.sub(r'["#*]', '', script)
-    return "The obstacle in the path becomes the path. Move forward."
+    return "Stop wasting your time. The obstacle becomes the way. Master your mind."
 
 
 def generate_movie_secret_script(topic: str, language: str = "en") -> str:
@@ -584,21 +584,21 @@ def generate_movie_secret_script(topic: str, language: str = "en") -> str:
     lang_name = "English" if language == "en" else "Turkish" if language == "tr" else language
     
     prompt = f"""
-# Role: Movie Theory & Easter Egg Expert
+# Role: Viral Movie Theory & Easter Egg Expert
 ## Task: Generate a "Did you notice?" script (30-40 words) for a YouTube Short.
 
 ## Movie Topic: {topic}
 
-## Structure:
-1. Hook: "Did you notice this in [Movie]?" or "Most people missed this detail..."
-2. The Secret: A mind-blowing detail, theory, or Easter egg related to the topic.
-3. Engagement: "Did you catch this? Let me know in the comments!"
+## Structure (CRITICAL):
+1. Hook: "Did you notice this in [Movie]?" or "Look closely at [Character]...". MUST BE UNDER 8 WORDS AND TAKE LESS THAN 3 SECONDS TO SAY.
+2. The Secret: A mind-blowing detail, theory, or Easter egg related to the topic. Extremely fast-paced.
+3. SEAMLESS LOOP: The very final sentence must grammatically connect directly back to the Hook sentence, creating a perfect loop when the video restarts. Do NOT say "Let me know in the comments" at the end. End abruptly on a cliffhanger that feeds into the intro.
 
 ## Constraints:
 - Language: {lang_name}
 - Tone: High-energy, mysterious, fast-paced.
 - No markdown, no "Narrator:", no titles.
-- Max 3 sentences.
+- Total length: Max 3-4 sentences.
 
 Script:""".strip()
 
@@ -606,7 +606,7 @@ Script:""".strip()
         script = _generate_response(prompt).strip()
         if script and "Error:" not in script:
             return re.sub(r'["#*]', '', script)
-    return f"Did you notice this detail in {topic}? Most people missed it completely!"
+    return f"Did you notice this in {topic}? Most people missed it completely."
 
 
 
