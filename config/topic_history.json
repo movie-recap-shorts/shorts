@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-23T14:15:13.255836",
+  "last_updated": "2026-02-23T15:13:54.514128",
   "history": [
     {
       "channel": "movies_en",
@@ -310,6 +310,16 @@
       "channel": "movies_en",
       "topic": "the hidden code in every Christopher Nolan movie you never noticed",
       "timestamp": "2026-02-23T14:15:13.255648"
+    },
+    {
+      "channel": "movies_en",
+      "topic": "why the 'bad guy' in your favorite movie is actually right",
+      "timestamp": "2026-02-23T15:10:15.043764"
+    },
+    {
+      "channel": "movies_en",
+      "topic": "the secret code in every wes anderson movie you never noticed",
+      "timestamp": "2026-02-23T15:13:54.513957"
     }
   ]
 }
