@@ -44,9 +44,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "movie,film,cinema,story": "https://www.amazon.com/dp/B07MTCMHZX?tag=shorts079-20",
-                "equipment,camera,setup": "https://www.amazon.com/dp/B07MTCMHZX?tag=shorts079-20",
-                "default": "https://www.amazon.com/dp/B07MTCMHZX?tag=shorts079-20"
+                "movie,film,cinema,story": "https://www.amazon.com/gp/video/primesignup?tag=shorts079-20",
+                "equipment,camera,setup": "https://www.amazon.com/prime?tag=shorts079-20",
+                "default": "https://www.amazon.com/gp/video/primesignup?tag=shorts079-20"
             }
         },
         {
@@ -93,9 +93,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "stoic,marcus,mindset,success": "https://www.amazon.com/dp/0812968255?tag=shorts079-20",
-                "habit,growth,learn": "https://www.amazon.com/dp/0735211299?tag=shorts079-20",
-                "default": "https://www.amazon.com/dp/0812968255?tag=shorts079-20"
+                "stoic,marcus,mindset,success": "https://www.amazon.com/hz/audible/mlp?tag=shorts079-20",
+                "habit,growth,learn": "https://www.amazon.com/kindleunlimited?tag=shorts079-20",
+                "default": "https://www.amazon.com/hz/audible/mlp?tag=shorts079-20"
             }
         },
         {
@@ -142,9 +142,10 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "investing,stocks,wealth": "https://www.amazon.com/dp/1501124021?tag=shorts079-20",
-                "crypto,bitcoin": "https://www.amazon.com/dp/1501124021?tag=shorts079-20",
-                "default": "https://www.amazon.com/dp/1501124021?tag=shorts079-20"
+                "investing,stocks,wealth": "https://business.amazon.com?tag=shorts079-20",
+                "crypto,bitcoin": "https://www.amazon.com/hz/audible/mlp?tag=shorts079-20",
+                "business,entrepreneur": "https://business.amazon.com?tag=shorts079-20",
+                "default": "https://www.amazon.com/hz/audible/mlp?tag=shorts079-20"
             }
         },
         {
@@ -191,9 +192,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "vpn,security,hack": "https://www.amazon.com/dp/B07VP35HBB?tag=shorts079-20",
-                "website,hosting": "https://www.amazon.com/dp/B07VP35HBB?tag=shorts079-20",
-                "default": "https://www.amazon.com/dp/B07VP35HBB?tag=shorts079-20"
+                "vpn,security,hack": "https://www.amazon.com/prime?tag=shorts079-20",
+                "website,hosting": "https://business.amazon.com?tag=shorts079-20",
+                "default": "https://www.amazon.com/hz/audible/mlp?tag=shorts079-20"
             }
         },
         {
@@ -240,7 +241,7 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "default": "https://www.amazon.com/dp/B08KQBY272?tag=shorts079-20"
+                "default": "https://www.amazon.com/gp/video/primesignup?tag=shorts079-20"
             }
         }
     ]
