@@ -24,6 +24,7 @@ from moviepy import (
     CompositeVideoClip,
     TextClip,
     VideoFileClip,
+    afx,
     concatenate_videoclips,
 )
 
