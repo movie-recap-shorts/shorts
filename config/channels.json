@@ -44,10 +44,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "movie,film,cinema,mistake,secret": "https://www.amazon.com/dp/B07MTCMHZX",
-                "equipment,camera,setup,gear": "https://www.amazon.com/dp/B07MTCMHZX",
-                "lotr,rings,peter,jackson,fantasy": "https://www.amazon.com/dp/B08KQBY272",
-                "default": "https://www.amazon.com/dp/B07MTCMHZX"
+                "movie,film,cinema,story": "https://www.audible.com/ep/audible-affiliate-program?tag=YOUR_AMAZON_TAG",
+                "equipment,camera,setup": "https://www.amazon.com/dp/B07MTCMHZX",
+                "default": "https://www.skillshare.com/en/affiliates"
             }
         },
         {
@@ -94,10 +93,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "marcus,aurelius,meditations,philosophy": "https://www.amazon.com/dp/0812968255",
-                "ryan,holiday,daily,wisdom": "https://www.amazon.com/dp/0735211736",
-                "atomic,habits,success,habit,mindset": "https://www.amazon.com/dp/0735211299",
-                "default": "https://www.amazon.com/dp/0735211299"
+                "stoic,marcus,mindset,success": "https://www.audible.com/ep/audible-affiliate-program?tag=YOUR_AMAZON_TAG",
+                "habit,growth,learn": "https://www.shortform.com/affiliate",
+                "default": "https://www.audible.com/ep/audible-affiliate-program?tag=YOUR_AMAZON_TAG"
             }
         },
         {
