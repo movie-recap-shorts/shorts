@@ -513,6 +513,10 @@ def generate_meme_short(
         meme_clip = meme_clip.subclipped(meme_start, meme_start + meme_max_dur)
         meme_clip = resize_clip_to_aspect(meme_clip, video_width, video_height)
         
+        # Audio Copyright Protection: Lower meme clip volume significantly
+        if meme_clip.audio is not None:
+            meme_clip = meme_clip.with_audio(meme_clip.audio.with_effects([afx.MultiplyVolume(0.2)]))
+            
         segment2 = meme_clip
         
         # --- SEGMENT 3: Outro ---
