@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-22T06:13:53.859780",
+  "last_updated": "2026-02-23T00:07:30.415086",
   "history": [
     {
       "channel": "movies_en",
@@ -260,6 +260,11 @@
       "channel": "motivation_en",
       "topic": "the one question that instantly kills anxiety (ancient greek secret)",
       "timestamp": "2026-02-22T06:13:53.859624"
+    },
+    {
+      "channel": "motivation_en",
+      "topic": "why your brain lies to you (and how to stop it)",
+      "timestamp": "2026-02-23T00:07:30.414916"
     }
   ]
 }
