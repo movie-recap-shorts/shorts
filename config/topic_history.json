@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-23T00:07:30.415086",
+  "last_updated": "2026-02-23T05:25:26.167900",
   "history": [
     {
       "channel": "movies_en",
@@ -265,6 +265,16 @@
       "channel": "motivation_en",
       "topic": "why your brain lies to you (and how to stop it)",
       "timestamp": "2026-02-23T00:07:30.414916"
+    },
+    {
+      "channel": "motivation_en",
+      "topic": "the one question that shuts down overthinking instantly",
+      "timestamp": "2026-02-23T05:19:09.696624"
+    },
+    {
+      "channel": "motivation_en",
+      "topic": "the one thing your brain does that's sabotaging your success",
+      "timestamp": "2026-02-23T05:25:26.167659"
     }
   ]
 }
