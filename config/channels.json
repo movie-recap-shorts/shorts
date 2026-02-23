@@ -44,9 +44,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "movie,film,cinema,story": "https://www.audible.com/ep/audible-affiliate-program?tag=shorts079-20",
-                "equipment,camera,setup": "https://www.amazon.com/dp/B07MTCMHZX",
-                "default": "https://www.skillshare.com/en/affiliates"
+                "movie,film,cinema,story": "https://www.amazon.com/dp/B07MTCMHZX?tag=shorts079-20",
+                "equipment,camera,setup": "https://www.amazon.com/dp/B07MTCMHZX?tag=shorts079-20",
+                "default": "https://www.amazon.com/dp/B07MTCMHZX?tag=shorts079-20"
             }
         },
         {
@@ -93,9 +93,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "stoic,marcus,mindset,success": "https://www.audible.com/ep/audible-affiliate-program?tag=shorts079-20",
-                "habit,growth,learn": "https://www.shortform.com/affiliate",
-                "default": "https://www.audible.com/ep/audible-affiliate-program?tag=shorts079-20"
+                "stoic,marcus,mindset,success": "https://www.amazon.com/dp/0812968255?tag=shorts079-20",
+                "habit,growth,learn": "https://www.amazon.com/dp/0735211299?tag=shorts079-20",
+                "default": "https://www.amazon.com/dp/0812968255?tag=shorts079-20"
             }
         },
         {
@@ -142,9 +142,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "investing,stocks,wealth": "https://www.webull.com/",
-                "crypto,bitcoin": "https://www.coinbase.com/",
-                "default": "https://www.webull.com/"
+                "investing,stocks,wealth": "https://www.amazon.com/dp/1501124021?tag=shorts079-20",
+                "crypto,bitcoin": "https://www.amazon.com/dp/1501124021?tag=shorts079-20",
+                "default": "https://www.amazon.com/dp/1501124021?tag=shorts079-20"
             }
         },
         {
@@ -191,9 +191,9 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "vpn,security,hack": "https://nordvpn.com/",
-                "website,hosting": "https://www.hostinger.com/",
-                "default": "https://nordvpn.com/"
+                "vpn,security,hack": "https://www.amazon.com/dp/B07VP35HBB?tag=shorts079-20",
+                "website,hosting": "https://www.amazon.com/dp/B07VP35HBB?tag=shorts079-20",
+                "default": "https://www.amazon.com/dp/B07VP35HBB?tag=shorts079-20"
             }
         },
         {
@@ -240,7 +240,7 @@
             "enable_instagram": true,
             "affiliate_id": "shorts079-20",
             "affiliate_links": {
-                "default": "https://www.amazon.com/dp/B08KQBY272"
+                "default": "https://www.amazon.com/dp/B08KQBY272?tag=shorts079-20"
             }
         }
     ]
