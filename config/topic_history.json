@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-24T20:11:09.047744",
+  "last_updated": "2026-02-24T21:24:03.524930",
   "history": [
     {
       "channel": "movies_en",
@@ -570,6 +570,16 @@
       "channel": "movies_en",
       "topic": "the one prop that appears in every tarantino movie",
       "timestamp": "2026-02-24T20:11:09.047563"
+    },
+    {
+      "channel": "movies_en",
+      "topic": "the shocking real-world location that inspired the matrix",
+      "timestamp": "2026-02-24T21:20:55.252569"
+    },
+    {
+      "channel": "movies_en",
+      "topic": "the one prop that ruined every scene in the lord of the rings",
+      "timestamp": "2026-02-24T21:24:03.524769"
     }
   ]
 }
