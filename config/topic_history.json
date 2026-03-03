@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-03-03T00:11:01.692214",
+  "last_updated": "2026-03-03T06:36:17.567550",
   "history": [
     {
       "channel": "movies_en",
@@ -800,6 +800,16 @@
       "channel": "movies_en",
       "topic": "the hidden message in the 'inception' spinning top scene everyone gets wrong",
       "timestamp": "2026-03-03T00:11:01.692048"
+    },
+    {
+      "channel": "movies_en",
+      "topic": "The one prop that secretly connects every Wes Anderson movie",
+      "timestamp": "2026-03-03T06:32:45.989875"
+    },
+    {
+      "channel": "movies_en",
+      "topic": "the hidden message in the 'shining' carpet pattern everyone overlooks",
+      "timestamp": "2026-03-03T06:36:17.567297"
     }
   ]
 }
