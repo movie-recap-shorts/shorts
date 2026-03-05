@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-03-05T04:17:03.299154",
+  "last_updated": "2026-03-05T05:29:03.093337",
   "history": [
     {
       "channel": "movies_en",
@@ -855,6 +855,16 @@
       "channel": "movies_en",
       "topic": "this one prop ruined the entire lord of the rings scene",
       "timestamp": "2026-03-05T04:17:03.298974"
+    },
+    {
+      "channel": "movies_en",
+      "topic": "the real reason this iconic horror movie scene was so terrifying",
+      "timestamp": "2026-03-05T05:25:22.698064"
+    },
+    {
+      "channel": "movies_en",
+      "topic": "the real reason the spinning top wobbled at the end of inception",
+      "timestamp": "2026-03-05T05:29:03.093189"
     }
   ]
 }
